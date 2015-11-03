@@ -36,4 +36,17 @@ for i in (z):
   u = base_url +  str(i) 
   complete_url.append(u)
   print(complete_url)
+
+
 import pandas as pd
+
+req_url = complete_url[0:11]
+print(req_url)
+
+readings = pd.DataFrame()
+for m in req_url:
+    reader = pd.read_csv(m,sep=',', header=0,error_bad_lines=False)
+    readings = readings.append(reader)
+    #print(readings.head(n=5))
+
+readings_df = readings.to_dict('records')
