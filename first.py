@@ -51,7 +51,7 @@ connecting with mongoDB in mongolab
 
 from pymongo import MongoClient
 
-client = MongoClient("mongodb://<nekumar>:<emo.123emo>@ds045614.mongolab.com:45614/spainsoccer")
+client = MongoClient("mongodb://<dbuser>:<password>@ds045614.mongolab.com:45614/spainsoccer")
 db = client['spainsoccer']
 collections = db['liga_data']
 collections.insert(readings_df)
