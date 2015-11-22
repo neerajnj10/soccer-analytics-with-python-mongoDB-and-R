@@ -46,12 +46,12 @@ readings_df = readings.to_dict('records')
 print(readings_df)  
 
 """
-connecting with mongoDB in mongolab
+connecting with mongoDB in localhost
 """
 
 from pymongo import MongoClient
 
-client = MongoClient("mongodb://<dbuser>:<password>@ds045614.mongolab.com:45614/spainsoccer")
+client = MongoClient("mongodb://localhost:27017/")
 db = client['spainsoccer']
 collections = db['liga_data']
 collections.insert(readings_df)
