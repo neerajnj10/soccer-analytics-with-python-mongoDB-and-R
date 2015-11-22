@@ -41,7 +41,7 @@ tags, and multiple categories, each expressed as an embedded array.
 - Go to the [The mongoDb download page](https://www.mongodb.org/downloads?_ga=1.192214248.339442226.1446671659#production)
 - Select the Operating system of your choice (the one you are working on), and download it on your sysytem. Double click the **.msi** file in the folder and run it.
 - Go to the *bin* sub-directory of the folder and in your command prompt, run **mongod.exe**
-- mongoDB would run on localhost nowa and is ready for inserting documents into it.
+- mongoDB would run on localhost(we can provide custom localhost, here we will use (`localhost:27017`, while exporting datato mongoDB) now and is ready for inserting documents into it.
 
 
 ### Inserting documents into mongoDB database.
