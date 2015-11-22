@@ -37,6 +37,8 @@ tags, and multiple categories, each expressed as an embedded array.
 
 `Source` : [Official webpage](https://www.mongodb.com/)
 
+[https://www.mongodb.com/assets/products/Nexus_Architecture_Grey_Labels-f343b771c2595f327b7c10d4a532bbfca2f55ee67425741cc63fb9073d76e4a3.png](https://www.mongodb.com/assets/products/Nexus_Architecture_Grey_Labels-f343b771c2595f327b7c10d4a532bbfca2f55ee67425741cc63fb9073d76e4a3.png?raw=true)
+
 ### Download and Install mongoDB
 
 - Go to the [The mongoDb download page](https://www.mongodb.org/downloads?_ga=1.192214248.339442226.1446671659#production)
