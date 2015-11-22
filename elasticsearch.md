@@ -45,4 +45,4 @@ MongoDB is primarily the general purpose storage system, a document based databs
 
 - In our case, though  the data at present for our project is not substantially large but the main aim of using several technologies and tools here, is to provide the **user-guide** when working with large datasets, which means steps to be followed while extending the prject would essentially be the same.
 
-- hence we wil show here how to use mongodb and elastic search together effectively, that is, puch the data from **mongoDB** instance to **elasticsearch**. Please follow this link to understand how to make connection between mongoDB and elasticsearch. 
+- hence we wil show here how to use mongodb and elastic search together effectively, that is, puch the data from **mongoDB** instance to **elasticsearch**. Please follow this link to understand how to make connection between mongoDB and elasticsearch [mongoelastic](https://github.com/neerajnj10/soccer-analytics-with-python-mongoDB-and-R/blob/master/mongoelastic.md)
