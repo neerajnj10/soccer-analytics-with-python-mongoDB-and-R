@@ -45,13 +45,4 @@ readings.rename(columns={'BbMx>2.5':'BbMxTwo', 'BbAv>2.5':'BbAvTwo','BbMx<2.5':'
 readings_df = readings.to_dict('records')
 print(readings_df)  
 
-"""
-connecting with mongoDB in localhost
-"""
 
-from pymongo import MongoClient
-
-client = MongoClient("mongodb://localhost:27017/")
-db = client['spainsoccer']
-collections = db['liga_data']
-collections.insert(readings_df)
