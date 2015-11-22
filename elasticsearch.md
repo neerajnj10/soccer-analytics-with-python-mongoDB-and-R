@@ -38,3 +38,11 @@ intelligence queries against your data.
 - Follow the instructions to check if this working by `Running curl -X GET http://localhost:9200/` , or by opening the browser and running `http://localhost:9200/` to see the notification of whether it is running.
 - If you followed the download and installation steps, it will run without error.
 
+
+# Why Elasticsearch with MongoDB
+
+MongoDB is primarily the general purpose storage system, a document based databse that allows you to easily store and expand teh datasets that are **not** in any structure or format, which is the greatest advantage of the noSQL databases, that is data doesn't necessarily have to be in relational format (tablular sets), however it is sometimes slow as a **search engine** which is where `elasticsearch` comes into picture, it is not the primary source of data management or storage but is very strong as a *search engine*. Therefore utlizing the efficiency of both the systems provide effective solution for big data management specially when you are working and deploying on the production enviroment. 
+
+- In our case, though  the data at present for our project is not substantially large but the main aim of using several technologies and tools here, is to provide the **user-guide** when working with large datasets, which means steps to be followed while extending the prject would essentially be the same.
+
+- hence we wil show here how to use mongodb and elastic search together effectively, that is, puch the data from **mongoDB** instance to **elasticsearch**. Please follow this link to understand how to make connection between mongoDB and elasticsearch. 
