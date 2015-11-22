@@ -1,0 +1,1 @@
+# mongoDb connectio with elasticsearch.
