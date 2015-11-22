@@ -23,7 +23,7 @@ together, instead of rows.
 
 > What is mongoDB?
 
-- MongoDB stores data as **documents** in a binary representation called $BSON$ (Binary JSON). Documents that share a similar 
+- MongoDB stores data as **documents** in a binary representation called BSON (Binary JSON). Documents that share a similar 
 structure are typically organized as collections. You can think of collections as being analogous to a table in a relational 
 database: documents are similar to rows, and fields are similar to columns.
 
