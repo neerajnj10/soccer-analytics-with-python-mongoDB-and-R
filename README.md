@@ -15,7 +15,11 @@ This project is an idea put at work on pipe-lining individual tools/languages an
 
 
 
-- The end goals considered for this project are finding: 
+
+
+
+## The end goals considered for this project are finding: 
+
 
 **The top scorers by the end of the season**
 
