@@ -35,3 +35,15 @@ multiple tables such as Categories, Tags, Users, Comments and Articles. In Mongo
 collections, one for users, and the other for articles. In each blog document there might be multiple comments, multiple 
 tags, and multiple categories, each expressed as an embedded array.
 
+
+### Download and Install mongoDB
+
+- Go to the (The mongoDb download page)[https://www.mongodb.org/downloads?_ga=1.192214248.339442226.1446671659#production]
+- Select the Operating system of your choice (the one you are working on), and download it on your sysytem. Double click the **.msi** file in the folder and run it.
+- Go to the *bin* sub-directory of the folder and in your command prompt, run **mongod.exe**
+- mongoDB would run on localhost nowa and is ready for inserting documents into it.
+
+
+### Inserting documents into mongoDB database.
+
+- there are many ways you could push your data into mongoDB, one of the them is to use **mongo shell** annd write commands on prompt, however this is usually not recommended. MongoDB provides several different  **drivers** that allows easier and better approach to inserting documents into the databse, one of the popular driver, we are going to use in our project is **python driver**, with *pymongo* module. Please refer to this page to this how to easily insert our data into mongoDB in few steps. (pymongo driver)[https://github.com/neerajnj10/soccer-analytics-with-python-mongoDB-and-R/blob/master/first.py]
