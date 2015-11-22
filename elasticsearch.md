@@ -29,3 +29,12 @@ that are important to you. Additionally, you can use the Elasticsearch aggregati
 intelligence queries against your data.
 
 `Source` : [official webpage](https://www.elastic.co/)
+
+
+## Downloading, Installing and Getting elasticsearch up and running.
+
+- Go to the downloads page and choose theoperating system and latest version of elastic search and download it on your system. [elastic](https://www.elastic.co/downloads/elasticsearch)
+- Unzip the folder and move to `bin` sub-directory of the folder and run `elasticsearch.bat` for windows.
+- Follow the instructions to check if this working by `Running curl -X GET http://localhost:9200/` , or by opening the browser and running `http://localhost:9200/` to see the notification of whether it is running.
+- If you followed the download and installation steps, it will run without error.
+
