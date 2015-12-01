@@ -1,4 +1,4 @@
-# finally connecting elastic data to R.
+### finally connecting elastic data to R.
 
 There is a package built for this purpose that allows retrieving data easily from `elastic` (also the package name) system in to R, and writing queries in R local langauge and working with it. 
 
