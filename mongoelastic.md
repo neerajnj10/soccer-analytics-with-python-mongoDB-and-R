@@ -121,11 +121,14 @@ Now we have 3 replica sets running on primary port shared by secondary ports.
 
 Now why did we choose port `27017` as primary port, in particular?
 
+
+### replicating mongo with elastic
+
 ```
-We want to be able to connect mongoDb to elasticsearch andwe would utilize the `mongo connector` for that purpose. 
+We want to be able to connect mongoDb to elasticsearch and we would utilize the `mongo connector` for that purpose. 
 ```
 
-###Installation
+####Installation
 
 The easiest way to install mongo-connector is with pip:
 
@@ -136,7 +139,6 @@ pip install mongo-connector
 You can also install the development version of mongo-connector manually:
 
 ```
-
 git clone https://github.com/10gen-labs/mongo-connector.git
 cd mongo-connector
 python setup.py install
