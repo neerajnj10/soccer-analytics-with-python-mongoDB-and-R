@@ -2,7 +2,7 @@
 
 There is a package built for this purpose that allows retrieving data easily from `elastic` (also the package name) system in to R, and writing queries in R local langauge and working with it. 
 
-
+> Please make sure that each time the connection between R and elasticsearch database is created, the elastic instance is running on the port `9200` (by default), to do this use: elasticsearch directory, go to command line, make it your current directory, and run `bin/elastic(for OS) or bin/elastic.bat(for windows)` 
 
 ```
 install.packages("elastic")
