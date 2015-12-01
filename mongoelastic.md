@@ -120,3 +120,44 @@ Now we have 3 replica sets running on primary port shared by secondary ports.
 
 
 Now why did we choose port `27017` as primary port, in particular?
+
+```
+We want to be able to connect mongoDb to elasticsearch andwe would utilize the `mongo connector` for that purpose. 
+```
+
+###Installation
+
+The easiest way to install mongo-connector is with pip:
+
+```
+pip install mongo-connector
+```
+
+You can also install the development version of mongo-connector manually:
+
+```
+
+git clone https://github.com/10gen-labs/mongo-connector.git
+cd mongo-connector
+python setup.py install
+```
+
+
+> After installing mongo connector for elastic search use following codes to make the connection.
+
+
+Mongo Connector can replicate to Elasticsearch using the Elastic DocManager. The most basic usage is the following:
+
+```
+mongo-connector -m localhost:27017 -t localhost:9200 -d elastic_doc_manager
+```
+
+- we specifically use therefore, localhost `27017` for mongodb database. 
+- This assumes there is a MongoDB replica set running on port 27017 and that Elasticsearch is running on port 9200 both on the local machine.
+
+
+old usage (before 2.0 release):
+
+```
+mongo-connector -m localhost:27017 -t localhost:9200 -d <your-doc-manager-folder>/elastic_doc_manager.py
+```
