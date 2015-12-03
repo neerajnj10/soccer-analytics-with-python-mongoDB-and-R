@@ -1,4 +1,4 @@
-### using R to do data analysis and modelling.
+### using R to do Data analysis and Modelling.
 
 
 
@@ -64,9 +64,7 @@ require(ggplot2, quietly=TRUE)
 ```
 
 
-we will change the date variable from char to date format.
-
-
+we will change the date variable from char to date format and find for any missing value before we start with analysis.
 
 ```{r}
 str(liga)
@@ -81,8 +79,10 @@ sapply(liga, function(x) sum(is.na(x)))
 The summary shows we do not have ANY missing values, which is a good sign.
 
 
+## correlation plot
+
+
 ```{r}
-#correlation plot
 
 # for this purpose we will subset the  numeric variables first.
 
