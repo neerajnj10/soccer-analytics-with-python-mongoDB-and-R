@@ -1,21 +1,6 @@
 ### using R to do data analysis and modelling.
 
 
-####now for the purpose of this project, we would exclude most of the betting variables, as they are not important right now.
-
-
-```
-
-liga <- laligadf[,c("Div","Date","HomeTeam","AwayTeam","FTHG","FTAG","FTR","HTHG","HTAG","HTR","HS","AS","HST","AST",
-                   "HC","AC","HF","AF","HY","AY","HR","AR","B365A","B365H","B365D")]
-
-
-#the variables removed above manually were depending on their importance in any theoritical w.r.t. to this project. 
-#we will further clean the data and add or remove depending on how influencing each variable is, and their importance 
-#etc.
-```
-
-
 
 Variables | Description
 ----------| -----------
@@ -45,6 +30,22 @@ Variables | Description
 `B365D` | `Bet365 draw odds`
 `B365A` | `Bet365 away win odds`
 
+
+
+##### Now for the purpose of this project, we would exclude most of the betting variables, as they are not important right now.
+
+
+```
+
+liga <- laligadf[,c("Div","Date","HomeTeam","AwayTeam","FTHG","FTAG","FTR","HTHG","HTAG",
+                  "HTR","HS","AS","HST","AST","HC","AC","HF","AF","HY","AY","HR","AR","B365A",
+                  "B365H","B365D")]
+
+
+#the variables removed above manually were depending on their importance in any theoritical w.r.t. to this project. 
+#we will further clean the data and add or remove depending on how influencing each variable is, and their importance 
+#etc.
+```
 
 ## Load the libraries.
 
@@ -77,12 +78,7 @@ sapply(liga, function(x) sum(is.na(x)))
 
 ```
 
-
-
 The summary shows we do not have ANY missing values, which is a good sign.
-
-
-
 
 
 ```{r}
@@ -95,7 +91,7 @@ liga.cor <- cor(liga_num, use="pairwise", method="pearson")
 # Order the correlations by their strength.
 ord <- order(liga.cor[1,])
 liga.cor <- liga.cor[ord, ord]
-corrplot(liga.cor, mar=c(0,0,1,0))
+corrplot(liga.cor, mar=c(0,0,1,0)) #correlation
 ```
 
 
