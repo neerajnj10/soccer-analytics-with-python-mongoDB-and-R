@@ -97,4 +97,4 @@ liga.cor <- liga.cor[ord, ord]
 corrplot(liga.cor, mar=c(0,0,1,0)) #correlation
 ```
 
-
+some of the variables are slightly correlated (however it depends on the threshold we choose to subset or accept a particular variable, based on correlation value.) We would as of now, retain all the variables, except for `B365A` or `B365D` as their correlation is close to $0.85$. We decide to keep `B365A`, for away win odds.
