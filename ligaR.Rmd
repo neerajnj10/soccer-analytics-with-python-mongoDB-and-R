@@ -82,10 +82,12 @@ sapply(liga, function(x) sum(is.na(x)))
 The summary shows we do not have ANY missing values, which is a good sign.
 
 
-## correlation plot
+## correlation plot & scatterplot matrix
 
 
 ```{r}
+
+#correlation plot
 
 # for this purpose we will subset the  numeric variables first.
 
@@ -94,7 +96,16 @@ liga.cor <- cor(liga_num, use="pairwise", method="pearson")
 # Order the correlations by their strength.
 ord <- order(liga.cor[1,])
 liga.cor <- liga.cor[ord, ord]
-corrplot(liga.cor, mar=c(0,0,1,0)) #correlation
+corrplot(liga.cor, mar=c(0,0,1,0))
+liga.cor
+rcor.test(liga_num, method = "pearson")
+
+#scatter plot matrix
+dta.col <- dmat.color(liga.cor) # get colors
+# reorder variables so those with highest correlation
+# are closest to the diagonal
+cpairs(liga_num, ord, panel.colors=dta.col, gap=.5,
+main="Variables Ordered and Colored by Correlation" )
 ```
 
-some of the variables are slightly correlated (however it depends on the threshold we choose to subset or accept a particular variable, based on correlation value.) We would as of now, retain all the variables, except for `B365A` or `B365D` as their correlation is close to $0.85$. We decide to keep `B365A`, for away win odds.
+some of the variables are slightly correlated (however it depends on the threshold we choose to subset or accept a particular variable, based on correlation value.) We would as of now, retain all the variables, except for `B365A` or `B365D` as their correlation is close to $0.85$, also shown in scatter plot matrix. We decide to keep `B365A`, for away win odds.
