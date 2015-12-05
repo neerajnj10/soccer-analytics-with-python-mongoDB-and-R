@@ -100,12 +100,70 @@ corrplot(liga.cor, mar=c(0,0,1,0))
 liga.cor
 rcor.test(liga_num, method = "pearson")
 
-#scatter plot matrix
 dta.col <- dmat.color(liga.cor) # get colors
 # reorder variables so those with highest correlation
 # are closest to the diagonal
 cpairs(liga_num, ord, panel.colors=dta.col, gap=.5,
 main="Variables Ordered and Colored by Correlation" )
 ```
+![correlation](https://cloud.githubusercontent.com/assets/11197322/11610839/1f8d1cdc-9b7d-11e5-93a5-8060b29faf90.png)
 
-some of the variables are slightly correlated (however it depends on the threshold we choose to subset or accept a particular variable, based on correlation value.) We would as of now, retain all the variables, except for `B365A` or `B365D` as their correlation is close to $0.85$, also shown in scatter plot matrix. We decide to keep `B365A`, for away win odds.
+![scatterplot](https://cloud.githubusercontent.com/assets/11197322/11610845/99e6c3f2-9b7d-11e5-9c91-6f7144608432.png)
+
+some of the variables are slightly correlated (however it depends on the threshold we choose to subset or accept a particular variable, based on correlation value.) We would as of now, retain all the variables.
+
+## further exploring the data
+
+```{r}
+
+ggplot(liga, aes(x=FTR)) + geom_histogram(binwidth=5)
+```
+
+
+- The general understanding from these two plots is that `Home` advantage is significant and plays good role in most cases in determining the winner, as full time results has more home wins than aways. 
+
+
+
+## Creating derived new metrics, by executing operations on various columns.
+
+```{r}
+#We create the target variable, `winner` for each match. This will be used in our model for prediction.
+
+#liga$winner <- ""
+liga$winner[liga$FTR=="H"]<- 1 #when home team wins
+liga$winner[liga$FTR=="A"]<- 0 #when away team wins
+liga$winner[liga$FTR=="D"]<- 2 #when neither team wins, game ends in draw.
+
+liga<- liga[-1] #remove first column as it is irrelavant,we already understand that teams data is from Div1.
+
+liga$ftg_diff<- liga$FTHG - liga$FTAG #full time goal difference. -ve for goal conceded by home team, positive for goals made by them.
+
+liga$htg_diff <- liga$HTHG -liga$HTAG #half time goal difference. -ve for goal conceded by home team, positive for goals made by them and 0 is for draw.
+
+# we may or may not need to know if the teams improved their performance from first half (45 minutes of play) int he second half and if that affected the play. 
+
+liga$hg_diff <- liga$FTHG - liga$HTHG #home team diff. in goals from first to full time, that is second half goals, we will call it home goal difference.
+liga$ag_diff <- liga$FTAG - liga$HTAG #away team diff. in goals from first to full time, that is second half goals, we will call it away goal difference.
+
+liga$shots_diff <- liga$HS -liga$AS #difference in number of shots attempted by each team.
+liga$shotstarget_diff <- liga$HST -liga$AST #difference in number of shots attempted and were on target as well,by each team.
+
+liga$corner_diff<- liga$HC- liga$AC #difference in corners(set-pieces) taken each team.
+liga$fouls_diff <- liga$HF - liga$AF #difference in fouls commited by two teams in a match
+
+#repeated fouls often result to yellow cards (temporary warnings), followed by red card (that is requiring a player to leave the field from the play ad would also be further banned for next match). This usually affects the game.
+
+liga$yellow_diff <- liga$HY -liga$AY #yellow cards diff.
+liga$red_diff <- liga$HR - liga$AR  #red cards diff.
+
+# we will further explore this part through visualization. We see that away team wins when home teams concedes more foul which turns into red cards. The insights are little unexpected as well. First we see that, in away teams win, maximum number of players red carded was 2, where home team accounted for 3 for a lossing cause. Secondy, even if away team gets 2 red cards and home team gets 0, away team wins, which could be credited to two reasons, one, that away team was stringer than home team and therefore, red cards played little or no part in the match against wekaer opponents for them, or second, the red cards plaayers were subjected to came into play very ate in the game, that is, towards the end of the game.
+
+# For home team winning, maximum cards away teams recieved were 4, and home team 2. However it is interesting to note that when away team got 4 cards in a game, which means out of 11 players, 4 were sent off, home team got NIL, so their team was more in the field and covered more and was able to dominate. 
+
+# However for the game that ended in draw, away team got max 3 cards, while home team 2. Hence again, it could be cause away teams after getting their players sent off, approached a defensive mind set in to play and considered draw a favorable result for them. As they are involved in more red cards during draw than home teams, and it also makes sense, as the stadium and fans are behind home team,not away team. For away team, winning in such condition with players out from game is always tough. 
+p <- ggplot(liga, aes(HR, AR),colour = factor(FTR)) + geom_point()
+# With one variable
+p + facet_grid(. ~ FTR)
+
+```
+
