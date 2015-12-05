@@ -110,7 +110,7 @@ main="Variables Ordered and Colored by Correlation" )
 
 ![scatterplot](https://cloud.githubusercontent.com/assets/11197322/11610845/99e6c3f2-9b7d-11e5-9c91-6f7144608432.png)
 
-some of the variables are slightly correlated (however it depends on the threshold we choose to subset or accept a particular variable, based on correlation value.) We would as of now, retain all the variables.
+some of the variables are slightly correlated such as `B365H, B365D, B365H` which is understable as betting odds are usally of very close value. (however it depends on the threshold we choose to subset or accept a particular variable, based on correlation value.) We would as of now, retain all the variables.
 
 ## further exploring the data
 
