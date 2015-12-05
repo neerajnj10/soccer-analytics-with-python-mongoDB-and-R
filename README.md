@@ -1,4 +1,4 @@
-# soccer-analytics-with-python-mongoDB-elasticsearch-kibana-marvel-R
+# soccer-analytics-with-python-mongoDB-elasticsearch-R
 Using **Python**, **NoSQL** (`mongoDB` & `elasticsearch`) and **R** for pipeline structure
 
 - The project is On-going... and would be updated here accordingly.
