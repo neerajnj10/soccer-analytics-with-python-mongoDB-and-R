@@ -119,7 +119,7 @@ some of the variables are slightly correlated (however it depends on the thresho
 ggplot(liga, aes(x=FTR)) + geom_histogram(binwidth=5)
 ```
 
-![hr](https://cloud.githubusercontent.com/assets/11197322/11610850/d38f7b62-9b7d-11e5-88a6-54f2a134a62f.png)
+![homewins](https://cloud.githubusercontent.com/assets/11197322/11610861/30459954-9b7e-11e5-9cb4-681360aeb3b2.png)
 
 
 
@@ -153,21 +153,37 @@ liga$shotstarget_diff <- liga$HST -liga$AST #difference in number of shots attem
 
 liga$corner_diff<- liga$HC- liga$AC #difference in corners(set-pieces) taken each team.
 liga$fouls_diff <- liga$HF - liga$AF #difference in fouls commited by two teams in a match
+```
 
 #repeated fouls often result to yellow cards (temporary warnings), followed by red card (that is requiring a player to leave the field from the play ad would also be further banned for next match). This usually affects the game.
 
 liga$yellow_diff <- liga$HY -liga$AY #yellow cards diff.
 liga$red_diff <- liga$HR - liga$AR  #red cards diff.
 
-# we will further explore this part through visualization. We see that away team wins when home teams concedes more foul which turns into red cards. The insights are little unexpected as well. First we see that, in away teams win, maximum number of players red carded was 2, where home team accounted for 3 for a lossing cause. Secondy, even if away team gets 2 red cards and home team gets 0, away team wins, which could be credited to two reasons, one, that away team was stringer than home team and therefore, red cards played little or no part in the match against wekaer opponents for them, or second, the red cards plaayers were subjected to came into play very ate in the game, that is, towards the end of the game.
+# we will further explore this part through visualization. We see that away team wins when home teams concedes more 
+foul which turns into red cards. The insights are little unexpected as well. First we see that, in away teams win, 
+maximum number of players red carded was 2, where home team accounted for 3 for a lossing cause. Secondy, even if away 
+team gets 2 red cards and home team gets 0, away team wins, which could be credited to two reasons, one, that away team 
+was stringer than home team and therefore, red cards played little or no part in the match against wekaer opponents for 
+them, or second, the red cards plaayers were subjected to came into play very ate in the game, that is, towards the end 
+of the game.
 
-# For home team winning, maximum cards away teams recieved were 4, and home team 2. However it is interesting to note that when away team got 4 cards in a game, which means out of 11 players, 4 were sent off, home team got NIL, so their team was more in the field and covered more and was able to dominate. 
+# For home team winning, maximum cards away teams recieved were 4, and home team 2. However it is interesting to note 
+that when away team got 4 cards in a game, which means out of 11 players, 4 were sent off, home team got NIL, so their 
+team was more in the field and covered more and was able to dominate. 
 
-# However for the game that ended in draw, away team got max 3 cards, while home team 2. Hence again, it could be cause away teams after getting their players sent off, approached a defensive mind set in to play and considered draw a favorable result for them. As they are involved in more red cards during draw than home teams, and it also makes sense, as the stadium and fans are behind home team,not away team. For away team, winning in such condition with players out from game is always tough. 
+# However for the game that ended in draw, away team got max 3 cards, while home team 2. Hence again, it could be cause 
+away teams after getting their players sent off, approached a defensive mind set in to play and considered draw a favorable 
+result for them. As they are involved in more red cards during draw than home teams, and it also makes sense, as the stadium 
+and fans are behind home team,not away team. For away team, winning in such condition with players out from game is always 
+tough. 
+
+
+```{r}
 p <- ggplot(liga, aes(HR, AR),colour = factor(FTR)) + geom_point()
 # With one variable
 p + facet_grid(. ~ FTR)
-
 ```
+
 
 ![hr](https://cloud.githubusercontent.com/assets/11197322/11610850/d38f7b62-9b7d-11e5-88a6-54f2a134a62f.png)
