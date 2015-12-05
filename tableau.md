@@ -9,7 +9,7 @@ We will discuss some of the workbook images below.
 
 ![winnerspergameperyear](https://cloud.githubusercontent.com/assets/11197322/11610819/1cc2629c-9b7c-11e5-9cd7-08281653946a.png)
 
-- We first start with the games won, drawn or lost by home team vs away teams for each year (over the entire dataset).
+- We first start with the games won, drawn or lost by home team vs away teams for each year (over the entire dataset), head-to-head results.
 
 
 
