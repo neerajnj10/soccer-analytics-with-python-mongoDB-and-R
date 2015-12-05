@@ -120,6 +120,7 @@ ggplot(liga, aes(x=FTR)) + geom_histogram(binwidth=5)
 ```
 
 
+
 - The general understanding from these two plots is that `Home` advantage is significant and plays good role in most cases in determining the winner, as full time results has more home wins than aways. 
 
 
@@ -167,3 +168,4 @@ p + facet_grid(. ~ FTR)
 
 ```
 
+![hr](https://cloud.githubusercontent.com/assets/11197322/11610850/d38f7b62-9b7d-11e5-88a6-54f2a134a62f.png)
