@@ -139,44 +139,42 @@ liga$winner[liga$FTR=="D"]<- 2 #when neither team wins, game ends in draw.
 
 liga<- liga[-1] #remove first column as it is irrelavant,we already understand that teams data is from Div1.
 
-liga$ftg_diff<- liga$FTHG - liga$FTAG #full time goal difference. -ve for goal conceded by home team, positive for goals made by them.
+liga$ftg_diff<- liga$FTHG - liga$FTAG #full time goal difference. -ve for goal conceded by home team, 
+positive for goals made by them.
 
-liga$htg_diff <- liga$HTHG -liga$HTAG #half time goal difference. -ve for goal conceded by home team, positive for goals made by them and 0 is for draw.
+liga$htg_diff <- liga$HTHG -liga$HTAG #half time goal difference. -ve for goal conceded by home team, 
+positive for goals made by them and 0 is for draw.
 
-# we may or may not need to know if the teams improved their performance from first half (45 minutes of play) int he second half and if that affected the play. 
+# we may or may not need to know if the teams improved their performance from first half (45 minutes of play) in the second 
+half and if that affected the play. 
 
-liga$hg_diff <- liga$FTHG - liga$HTHG #home team diff. in goals from first to full time, that is second half goals, we will call it home goal difference.
-liga$ag_diff <- liga$FTAG - liga$HTAG #away team diff. in goals from first to full time, that is second half goals, we will call it away goal difference.
+liga$hg_diff <- liga$FTHG - liga$HTHG #home team diff. in goals from first to full time, that is second half goals, 
+we will call it home goal difference.
+liga$ag_diff <- liga$FTAG - liga$HTAG #away team diff. in goals from first to full time, that is second half goals,
+we will call it away goal difference.
 
 liga$shots_diff <- liga$HS -liga$AS #difference in number of shots attempted by each team.
-liga$shotstarget_diff <- liga$HST -liga$AST #difference in number of shots attempted and were on target as well,by each team.
+liga$shotstarget_diff <- liga$HST -liga$AST #difference in number of shots attempted and were on target as well,
+by each team.
 
 liga$corner_diff<- liga$HC- liga$AC #difference in corners(set-pieces) taken each team.
 liga$fouls_diff <- liga$HF - liga$AF #difference in fouls commited by two teams in a match
 ```
 
-#repeated fouls often result to yellow cards (temporary warnings), followed by red card (that is requiring a player to leave the field from the play ad would also be further banned for next match). This usually affects the game.
+-repeated fouls often result to yellow cards (temporary warnings), followed by red card (that is requiring a player to leave the field from the play ad would also be further banned for next match). This usually affects the game.
 
+```{r}
 liga$yellow_diff <- liga$HY -liga$AY #yellow cards diff.
 liga$red_diff <- liga$HR - liga$AR  #red cards diff.
+```
 
-# we will further explore this part through visualization. We see that away team wins when home teams concedes more 
+- we will further explore this part through visualization. We see that away team wins when home teams concedes more 
 foul which turns into red cards. The insights are little unexpected as well. First we see that, in away teams win, 
 maximum number of players red carded was 2, where home team accounted for 3 for a lossing cause. Secondy, even if away 
 team gets 2 red cards and home team gets 0, away team wins, which could be credited to two reasons, one, that away team 
 was stringer than home team and therefore, red cards played little or no part in the match against wekaer opponents for 
 them, or second, the red cards plaayers were subjected to came into play very ate in the game, that is, towards the end 
 of the game.
-
-# For home team winning, maximum cards away teams recieved were 4, and home team 2. However it is interesting to note 
-that when away team got 4 cards in a game, which means out of 11 players, 4 were sent off, home team got NIL, so their 
-team was more in the field and covered more and was able to dominate. 
-
-# However for the game that ended in draw, away team got max 3 cards, while home team 2. Hence again, it could be cause 
-away teams after getting their players sent off, approached a defensive mind set in to play and considered draw a favorable 
-result for them. As they are involved in more red cards during draw than home teams, and it also makes sense, as the stadium 
-and fans are behind home team,not away team. For away team, winning in such condition with players out from game is always 
-tough. 
 
 
 ```{r}
@@ -185,5 +183,19 @@ p <- ggplot(liga, aes(HR, AR),colour = factor(FTR)) + geom_point()
 p + facet_grid(. ~ FTR)
 ```
 
-
 ![hr](https://cloud.githubusercontent.com/assets/11197322/11610850/d38f7b62-9b7d-11e5-88a6-54f2a134a62f.png)
+
+
+- For home team winning, maximum cards away teams recieved were 4, and home team 2. However it is interesting to note 
+that when away team got 4 cards in a game, which means out of 11 players, 4 were sent off, home team got NIL, so their 
+team was more in the field and covered more and was able to dominate. 
+
+
+- However for the game that ended in draw, away team got max 3 cards, while home team 2. Hence again, it could be cause 
+away teams after getting their players sent off, approached a defensive mind set in to play and considered draw a favorable 
+result for them. As they are involved in more red cards during draw than home teams, and it also makes sense, as the stadium 
+and fans are behind home team,not away team. For away team, winning in such condition with players out from game is always 
+tough. 
+
+
+
