@@ -23,7 +23,7 @@ This project is an idea put at work on pipe-lining individual tools/languages an
 ## The end goals considered for this project are finding: 
 
 
-** Predicting per game win-loss-draw with some accuracy for home as well as away games, in head-to-head fixtures**
+**Predicting per game win-loss-draw with some accuracy for home as well as away games, in head-to-head fixtures**
 
 - The teams data selected for this purpose is restricted to Laliga, which is the Spanish competition between 20 Division-I teams. Shiny web development (which is an integration with R software provides excellent highly resourceful visualization for the end results as well for reporting, and hence would also be incorporated with it)
 
