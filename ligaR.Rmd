@@ -3,16 +3,7 @@
 
 ### Using R to do Data analysis and Modelling.
 
-
-
----
-title: "projectreport"
-author: "Neeraj"
-date: "December 9, 2015"
-output: html_document
-runtime: shiny
----
-
+----------------------------------------------------
 
 ```{r, echo=FALSE,eval=TRUE}
 #install.packages("elastic")
