@@ -670,7 +670,7 @@ time.taken11
 ```{r}
 #Decion tree.
 
-liga_test$PredictedFTRWhenHTRisknown <- as.matrix(p1)
+#liga_test$PredictedFTRWhenHTRisknown <- as.matrix(p1)
 ```
 
 
@@ -1054,3 +1054,6 @@ time.taken9new
 time.taken10new
 time.taken11new
 ```
+
+> for second model we will select GLM-Generlized liner (multinomial) model.
+
