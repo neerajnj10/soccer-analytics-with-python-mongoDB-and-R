@@ -225,6 +225,11 @@ liga$Date <- d4
 # dividing dataset into training, validation and testing dataset.
 # we will want to predict results for current season correctly, so we will choose it as test dataset. Current season starts from month of august, hence we will subset this data.
 
+liga$FTHG <- NULL
+liga$FTAG <- NULL
+liga$HomeWinodd <- NULL
+liga$AwayWinodd <- NULL
+liga$Drawodd <- NULL
 liga_test <- subset(liga, Date > "2015-08-01" )
 liga_train <- subset(liga, Date < "2015-08-01" )
 liga_train <- liga_train[-c(1,2,3)]
@@ -237,7 +242,7 @@ liga_test <- liga_test[-c(1,2,3)]
 
 ```{r}
 library(colorspace)
-numeric <- liga_train[-c(3,6)]
+numeric <- liga_train[-c(1,4)]
 
 categoric <- liga_train[ "HTR"]
 
@@ -252,7 +257,7 @@ pc
 # Summarise the importance of the components found.
 summary(pc)
 
-#Summary shows first 13 principal components are able to explain about 94% of the variability in the dataset.
+#Summary shows first 11 principal components are able to explain about 94% of the variability in the dataset.
 
 # Display a plot showing the relative importance of the components.
 
@@ -279,7 +284,7 @@ options(warn=-1)
 
 
 # Build the Decision Tree model.
-
+start.time <- Sys.time() 
 set.seed(12)
 liga_dt <- rpart(FTR ~ .,
     data=liga_train,
@@ -287,7 +292,8 @@ liga_dt <- rpart(FTR ~ .,
     parms=list(split="information"),
     control=rpart.control(usesurrogate=0, 
         maxsurrogate=0))
-
+end.time <- Sys.time()
+time.taken1 <- end.time - start.time
 
 # Generate a textual view of the Decision Tree model.
 print(liga_dt)
@@ -398,10 +404,12 @@ gbm_pr <- predict.gbm(liga_gbm, liga_test, best.iter,
 
 
 #naive bayes.
-
+start.time <- Sys.time() 
+set.seed(567890)
 liga_nb <- naiveBayes(FTR ~ ., data = liga_train, laplace = 3)
 liga_nb
-
+end.time <- Sys.time()
+time.taken4 <- end.time - start.time  
 # Regression model - GLM
 
 # Build a multinomial model using the nnet package.
@@ -416,7 +424,7 @@ start.time <- Sys.time()
 set.seed(678)
 liga_glm <- multinom(FTR ~ ., data=liga_train, trace=FALSE, maxit=1000)
 end.time <- Sys.time() 
-time.taken4 <- end.time - start.time  
+time.taken5 <- end.time - start.time  
 # Generate a textual view of the Linear model.
 mostImportantVariables <- varImp(liga_glm)
 mostImportantVariables$Variables <- row.names(mostImportantVariables)
@@ -450,7 +458,7 @@ liga_test$FTR <- as.factor(liga_test$FTR)
 # Obtain the response from the Decision Tree model.
 
 liga_pr <- predict(liga_dt, newdata=liga_test, type="class")
-
+liga_pr
 # Generate the confusion matrix showing counts.
 cm <- confusionMatrix(liga_pr, liga_test$FTR)
 cm
@@ -463,36 +471,36 @@ overallcm
 
 
 ligarf_pr <- predict(liga_rf, newdata=(liga_test))
-
+liga_pr
 # Generate the confusion matrix showing counts.
 rfcm <- confusionMatrix(ligarf_pr, liga_test$FTR)
 rfcm
 #View(data.frame(cbind(as.matrix(ligarf_pr))[,1], as.matrix(liga_test$FTR))) #important.
-overallrfcm <- cm$overall
+overallrfcm <- rfcm$overall
 overallrfcm
 # Generate an Error Matrix for the SVM model.
 
 # Obtain the response from the SVM model.
 
 liga_kvsmpr <- predict(liga_ksvm, newdata=liga_test)
-
+liga_kvsmpr
 # Generate the confusion matrix showing counts.
 kvsmcm <- confusionMatrix(liga_kvsmpr, liga_test$FTR)
 kvsmcm
 #View(data.frame(cbind(as.matrix(liga_kvsmpr))[,1], as.matrix(liga_test$FTR))) #important.
-overallkvsm <- cm$overall
+overallkvsm <- kvsmcm$overall
 overallkvsm
 # Generate an Error Matrix for the Linear model.
 
 # Obtain the response from the Linear model.
 
 gpr <- predict(liga_glm, newdata=liga_test)
-
+gpr
 # Generate the confusion matrix showing counts.
 gcm <- confusionMatrix(gpr, liga_test$FTR)
 gcm
 #View(data.frame(cbind(as.matrix(gpr))[,1], as.matrix(liga_test$FTR))) #important.
-overallg <- cm$overall
+overallg <- gcm$overall
 overallg
 
 
@@ -522,7 +530,7 @@ set.seed(2)
 fit1 <- train(FTR ~ ., data = liga_train, method = "rpart", tuneLength = 30, 
       trControl = trainControl(method = "repeatedcv", repeats = 3))
 end.time <- Sys.time()  
-time.taken1 <- end.time - start.time
+time.taken6 <- end.time - start.time
 
 fit1
 p1 <- predict(fit1, newdata=liga_test, type="raw")
@@ -531,25 +539,83 @@ cm1 #tuning improved the performance of the decision tree. It is similar to rand
 
 
 plot(fit1, metric= "Kappa")
+plot(fit1, metric= "Accuracy")
+
 sfStop()
 sfInit (parallel=TRUE , cpus=5)
+start.time <- Sys.time()  
 fit2 <- train(FTR ~ ., data = liga_train, method = "gbm",verbose = FALSE, trControl = trainControl(## 5-fold CV
                            method = "repeatedcv",
                            number =5,
                            ## repeated ten times
                            repeats = 5))
+end.time <- Sys.time()  
+time.taken7 <- end.time - start.time
+
 fit2
+p2 <- predict(fit2, newdata=liga_test)
+cm2 <- confusionMatrix(p2, liga_test$FTR)
+cm2
 plot(fit2, metric="Kappa")
-fit3 <- train(FTR ~ ., data = liga_train, method = "rf", trControl=trainControl(method="cv",number=5),
+plot(fit2, metric="Accuracy")
+
+sfStop()
+sfInit (parallel=TRUE , cpus=5)
+start.time <- Sys.time()  
+
+fit3 <- train(FTR ~ ., data = liga_train, method = "rf",ntree=500, importance=TRUE, 
+              trControl=trainControl(method = "cv",  
+                           number = 5,
+                           repeats = 1, selectionFunction = "oneSE"),
                 prox=TRUE,allowParallel=TRUE)
+end.time <- Sys.time()  
+time.taken8 <- end.time - start.time
 fit3
-ggplot(fit3, metric="Kappa")
+p3 <- predict(fit3, newdata=liga_test)
+cm3 <- confusionMatrix(p3, liga_test$FTR)
+cm3
+
+plot(fit3, metric="Kappa")
+plot(fit3, metric="Accuracy")
+
+sfStop()
+sfInit (parallel=TRUE , cpus=5)
+start.time <- Sys.time()  
+
 fit4 <- train( FTR ~ ., data = liga_train, method = "nb", trControl = trainControl(method = "cv", number = 10)) 
+end.time <- Sys.time()  
+time.taken9 <- end.time - start.time
 fit4
+p4 <- predict(fit4, newdata=liga_test)
+cm4 <- confusionMatrix(p4, liga_test$FTR)
+cm4
+
 plot(fit4, metric="Kappa")
+plot(fit4, metric="Accuracy")
+
+sfStop()
+sfInit (parallel=TRUE , cpus=5)
+start.time <- Sys.time()  
+
 fit5 <- train(FTR ~ ., data = liga_train, method = "svmLinear", tuneLength = 30, trControl =trainControl(method = "repeatedcv", repeats = 3))
+end.time <- Sys.time()  
+time.taken10 <- end.time - start.time
 fit5
-#train(FTR ~ ., data = liga_train, method = "multinom", tuneLength = 10, trControl = cvCtrl)
+p5 <- predict(fit5, newdata=liga_test)
+cm5 <- confusionMatrix(p5, liga_test$FTR)
+cm5
+
+sfStop()
+sfInit (parallel=TRUE , cpus=5)
+start.time <- Sys.time()  
+
+fit6 <- train(FTR ~ ., data = liga_train, method = "multinom", maxit=1000, tuneLength=1, trControl = trainControl(method = "cv", number=10, savePredictions=TRUE))
+end.time <- Sys.time()  
+time.taken11 <- end.time - start.time
+fit6
+p6 <- predict(fit6, newdata=liga_test)
+cm6 <- confusionMatrix(p6, liga_test$FTR)
+cm6
 sfStop()
 ```
 
@@ -560,36 +626,431 @@ sfStop()
 ## Model Selection.
 
 
-- We noticed that naive Bayes produced worst result of all. While the performance of `Random forest`, `SVM`, `Decision Tree` and `Multinoom` was same, we would select the best model based on that takes least time in conducting training the model over the train dataset.
-We will calculate the time and determine the selection. For `decision tree` we will use the time for tuned model, instead oof original, since the new model produced accuracy = $1$.
+- We noticed while the performance of `Random forest`, `SVM`, `Decision Tree` and `Multinom` was same for original model, on cross validation, decidion tree proved to be better than the rest, much of wwhich could be attributed to the size of the data.
 
-
+- accuracy and kappa values.
 
 ```{r}
+overallcm
+overallkvsm
+overallrfcm
+overallg
+overallnb
+cm1$overall #decision tree
+cm2$overall #gbm
+cm3$overall #random forest
+cm4$overall #naive Bayes
+cm5$overall #svm
+cm6$overall #glm
+
+```
+
+
+- Time taken by each model, with cv and without cv as well.
+
+```{r}
+
 time.taken1
 time.taken2
 time.taken3
 time.taken4
+time.taken5
+time.taken6
+time.taken7
+time.taken8
+time.taken9
+time.taken10
+time.taken11
 ```
 
 
-
-Model | Time-Taken
-------|---------
-`Decision tree` | `16.44866 secs (also on parallel execution)
-`Random forest` | `10.41537 secs`
-`SVM` | `19.81351 secs`
-`Linear model (GLM-Multinom)` | ` 6.910282 secs`
-
-
-> We will therefore use ` GLM (Multinomial model)`
+> We will therefore use `Cross validated Decision Tree for our prediction` that has accuracy of aaaround 71% on test set
 
 
 ```{r}
-#glm.
+#Decion tree.
 
-liga_test$PredictedFTR <- as.matrix(gpr)
+liga_test$PredictedFTRWhenHTRisknown <- as.matrix(p1)
 ```
 
 
 
+### Our second model (additional model), is based on the situation when wwe do not have half time results as well, or half time goals, from each team. Above model is valuable when we want to predict for a winner withh half time results. Lets try without those results, and see how accurately we ccan then predict for a winner of a match at the start. For this we will remove HTHG, HTAG, HTR from our selected features(predictors.) in both train and test data set.
+
+
+```{r}
+#### improvising features. 
+
+
+liga_train$HTHG <- NULL
+liga_train$HTAG <- NULL
+liga_train$HTR <- NULL
+liga_test$HTHG <- NULL
+liga_test$HTAG <- NULL
+liga_test$HTR <- NULL
+
+#################################
+#now lets build the model again and cross validate.
+
+options(warn=-1)
+# Reset the random number seed to obtain the same results each time.
+
+
+# Build the Decision Tree model.
+start.time <- Sys.time() 
+set.seed(12)
+liga_dtnew <- rpart(FTR ~ .,
+    data=liga_train,
+    method="class",
+    parms=list(split="information"),
+    control=rpart.control(usesurrogate=0, 
+        maxsurrogate=0))
+end.time <- Sys.time()
+time.taken1new <- end.time - start.time
+
+# Generate a textual view of the Decision Tree model.
+print(liga_dtnew)
+printcp(liga_dtnew)
+
+# Plot the resulting Decision Tree. 
+# We use the rpart.plot package.
+fancyRpartPlot(liga_dtnew, main="Decision Tree- FTR")
+
+# List the rules from the tree using a Rattle support function.
+
+asRules(liga_dtnew)
+  
+
+
+# Random Forest 
+
+# The 'randomForest' package provides the 'randomForest' function.
+
+# Build the Random Forest model.
+
+
+liga_train$FTR <- as.factor(liga_train$FTR)
+
+start.time <- Sys.time() 
+set.seed(1234)
+liga_rfnew <- randomForest(formula = (FTR) ~ .,data = liga_train,ntree = 500, mtry = 3, 
+                        importance = TRUE,na.action=na.roughfix, replace = FALSE)
+
+
+end.time <- Sys.time()
+time.taken2new <- end.time - start.time
+
+
+# Generate textual output of 'Random Forest' model.
+
+liga_rfnew
+
+# List the importance of the variables.
+
+rnnew <- round(importance(liga_rfnew), 2)
+rnnew[order(rnnew[,3], decreasing=TRUE),]
+
+# Plot the relative importance of the variables.
+
+varImpPlot(liga_rfnew, main="")
+title(main="Variable Importance Random Forest")
+
+# Plot the error rate against the number of trees.
+
+plot(liga_rfnew, main="")
+legend("topright", c("OOB", "A", "D", "H"), text.col=1:6, lty=1:3, col=1:3)
+title(main="Error Rates Random Forest")
+
+# Display tree number 1.
+
+#printRandomForests(liga_rfnew, 1)
+
+# Plot the OOB ROC curve.
+
+aucc <- roc.area(as.integer(as.factor(liga_train$FTR))-1,
+                 liga_rfnew$votes[,2])$A
+roc.plot(as.integer(as.factor(liga_train$FTR))-1,
+         liga_rf$votes[,2], main="")
+legend("bottomright", bty="n",
+       sprintf("Area Under the Curve (AUC) = %1.3f", aucc))
+title(main="OOB ROC Curve Random Forest")
+
+
+
+# Build a Support Vector Machine model.
+
+start.time <- Sys.time() 
+set.seed(567890)
+liga_ksvmnew <- ksvm(FTR ~ .,
+      data=liga_train,
+      kernel="rbfdot",
+      prob.model=TRUE)
+end.time <- Sys.time()
+time.taken3new <- end.time - start.time  
+# Generate a textual view of the SVM model.
+
+liga_ksvmnew
+
+# Time taken: 1.22 secs
+
+# Generalized Boosted Regression Models (gbm) model.
+
+
+liga_train$FTR <- as.factor(liga_train$FTR)
+liga_gbmnew <- gbm(FTR~., data = liga_train, distribution= "multinomial",n.trees=100, shrinkage= 0.05,
+                interaction.depth=3, cv.folds=3, verbose=FALSE,n.cores=1)
+liga_gbmnew
+best.iternew <- gbm.perf(liga_gbmnew,method="OOB")
+print(best.iternew)
+best.iternew <- gbm.perf(liga_gbmnew,method="cv")
+print(best.iternew)
+summary(liga_gbmnew, n.trees=1)
+summary(liga_gbmnew, n.trees=best.iter)
+print(pretty.gbm.tree(liga_gbmnew,1))
+print(pretty.gbm.tree(liga_gbmnew,liga_gbmnew$n.trees))
+
+gbm_prnew <- predict.gbm(liga_gbmnew, liga_test, best.iter, 
+                                  type="response")
+
+
+#naive bayes.
+start.time <- Sys.time() 
+set.seed(567890)
+liga_nbnew <- naiveBayes(FTR ~ ., data = liga_train, laplace = 3)
+liga_nbnew
+end.time <- Sys.time()
+time.taken4new <- end.time - start.time  
+# Regression model - GLM
+
+# Build a multinomial model using the nnet package.
+
+# Summarise multinomial model using Anova from the car package.
+
+
+
+# Build a Regression model.
+
+start.time <- Sys.time()
+set.seed(678)
+liga_glmnew <- multinom(FTR ~ ., data=liga_train, trace=FALSE, maxit=500)
+end.time <- Sys.time() 
+time.taken5new <- end.time - start.time  
+# Generate a textual view of the Linear model.
+mostImportantVariablesnew <- varImp(liga_glmnew)
+mostImportantVariablesnew$Variables <- row.names(mostImportantVariablesnew)
+mostImportantVariablesnew <- mostImportantVariablesnew[order(-mostImportantVariablesnew$Overall),]
+print(head(mostImportantVariablesnew))
+
+
+liga_summarynew <- summary(liga_glmnew,Wald.ratios=TRUE)
+liga_summarynew
+cat(sprintf("Log likelihood: %.3f (%d df)", logLik(liga_glmnew)[1], attr(logLik(liga_glmnew), "df")))
+
+cat('==== ANOVA ====')
+print(Anova(liga_glmnew))
+
+
+
+############################################## Evaluate model performance######################################
+
+
+# Generate an Error Matrix for the Decision Tree model.
+
+# Obtain the response from the Decision Tree model.
+
+liga_prnew <- predict(liga_dtnew, newdata=liga_test, type="class")
+liga_prnew
+# Generate the confusion matrix showing counts.
+cmnew <- confusionMatrix(liga_prnew, liga_test$FTR)
+cmnew
+#View(data.frame(cbind(as.matrix(liga_pr))[,1], as.matrix(liga_test$FTR))) #important.
+overallcmnew <- cmnew$overall
+overallcmnew
+# Generate an Error Matrix for the Random Forest model.
+
+# Obtain the response from the Random Forest model.
+
+
+ligarf_prnew <- predict(liga_rfnew, newdata=(liga_test))
+ligarf_prnew
+# Generate the confusion matrix showing counts.
+rfcmnew <- confusionMatrix(ligarf_prnew, liga_test$FTR)
+rfcmnew
+#View(data.frame(cbind(as.matrix(ligarf_pr))[,1], as.matrix(liga_test$FTR))) #important.
+overallrfcmnew <- rfcmnew$overall
+overallrfcmnew
+# Generate an Error Matrix for the SVM model.
+
+# Obtain the response from the SVM model.
+
+liga_kvsmprnew <- predict(liga_ksvmnew, newdata=liga_test)
+liga_kvsmprnew
+# Generate the confusion matrix showing counts.
+kvsmcmnew <- confusionMatrix(liga_kvsmprnew, liga_test$FTR)
+kvsmcmnew
+#View(data.frame(cbind(as.matrix(liga_kvsmpr))[,1], as.matrix(liga_test$FTR))) #important.
+overallkvsmnew <- kvsmcmnew$overall
+overallkvsmnew
+# Generate an Error Matrix for the Linear model.
+
+# Obtain the response from the Linear model.
+
+gprnew <- predict(liga_glmnew, newdata=liga_test)
+gprnew
+# Generate the confusion matrix showing counts.
+gcmnew <- confusionMatrix(gprnew, liga_test$FTR)
+gcmnew
+#View(data.frame(cbind(as.matrix(gpr))[,1], as.matrix(liga_test$FTR))) #important.
+overallgnew <- gcmnew$overall
+overallgnew
+
+
+# naive bayes.
+nb_prnew <- predict(liga_nbnew, newdata=liga_test)
+nb_prnew
+nbcmnew <- confusionMatrix(nb_prnew, liga_test$FTR)
+nbcmnew
+#View(data.frame(cbind(as.matrix(nb_pr))[,1], as.matrix(liga_test$FTR))) #important.
+overallnbnew <- nbcmnew$overall
+overallnbnew
+
+
+#######################################tuning- cross validation for each model#############################
+
+sfInit (parallel=TRUE , cpus=5)
+start.time <- Sys.time()  
+set.seed(2) 
+fit1new <- train(FTR ~ ., data = liga_train, method = "rpart", tuneLength = 30, 
+      trControl = trainControl(method = "repeatedcv", repeats = 3))
+end.time <- Sys.time()  
+time.taken6new <- end.time - start.time
+
+fit1new
+p1new <- predict(fit1new, newdata=liga_test, type="raw")
+cm1new <- confusionMatrix(p1new, liga_test$FTR)
+cm1new 
+
+
+plot(fit1new, metric= "Kappa")
+plot(fit1new, metric= "Accuracy")
+
+sfStop()
+
+sfInit (parallel=TRUE , cpus=5)
+start.time <- Sys.time()  
+fit2new <- train(FTR ~ ., data = liga_train, method = "gbm",verbose = FALSE, trControl = trainControl(## 5-fold CV
+                           method = "repeatedcv",
+                           number =5,
+                           ## repeated ten times
+                           repeats = 5))
+end.time <- Sys.time()  
+time.taken7new <- end.time - start.time
+
+fit2new
+p2new <- predict(fit2new, newdata=liga_test)
+cm2new <- confusionMatrix(p2new, liga_test$FTR)
+cm2new
+plot(fit2new, metric="Kappa")
+plot(fit2new, metric="Accuracy")
+
+sfStop()
+
+
+sfInit (parallel=TRUE , cpus=5)
+
+start.time <- Sys.time()  
+
+fit3new <- train(FTR ~ ., data = liga_train, method = "rf",ntree=500, importance=TRUE, 
+              trControl=trainControl(method = "cv",  
+                           number = 5,
+                           repeats = 1, selectionFunction = "oneSE"),
+                prox=TRUE,allowParallel=TRUE)
+end.time <- Sys.time()  
+time.taken8new <- end.time - start.time
+fit3new
+p3new <- predict(fit3new, newdata=liga_test)
+cm3new <- confusionMatrix(p3new, liga_test$FTR)
+cm3new
+
+plot(fit3new, metric="Kappa")
+plot(fit3new, metric="Accuracy")
+
+sfStop()
+
+sfInit (parallel=TRUE , cpus=5)
+
+start.time <- Sys.time()  
+
+fit4new <- train( FTR ~ ., data = liga_train, method = "nb", trControl = trainControl(method = "cv", number = 10)) 
+end.time <- Sys.time()  
+time.taken9new <- end.time - start.time
+fit4
+p4new <- predict(fit4new, newdata=liga_test)
+cm4new <- confusionMatrix(p4new, liga_test$FTR)
+cm4new
+
+plot(fit4new, metric="Kappa")
+plot(fit4new, metric="Accuracy")
+
+sfStop()
+
+sfInit (parallel=TRUE , cpus=5)
+
+start.time <- Sys.time()  
+fit5new <- train(FTR ~ ., data = liga_train, method = "svmLinear", tuneLength = 30, trControl =trainControl(method = "repeatedcv", repeats = 3))
+end.time <- Sys.time()  
+time.taken10new <- end.time - start.time
+fit5new
+p5new <- predict(fit5new, newdata=liga_test)
+cm5new <- confusionMatrix(p5new, liga_test$FTR)
+cm5new
+
+sfStop()
+
+sfInit (parallel=TRUE , cpus=5)
+
+start.time <- Sys.time()  
+
+fit6new <- train(FTR ~ ., data = liga_train, method = "multinom", maxit=500, tuneLength=1, trControl = trainControl(method = "cv", number=10, savePredictions=TRUE))
+end.time <- Sys.time()  
+time.taken11new <- end.time - start.time
+fit6new
+p6new <- predict(fit6new, newdata=liga_test)
+cm6new <- confusionMatrix(p6new, liga_test$FTR)
+cm6new
+sfStop()
+
+
+############################# Model Selection.##################################################
+
+
+###accuracy and kappa values.
+
+
+overallcmnew
+overallkvsmnew
+overallrfcmnew
+overallgnew
+overallnbnew
+cm1new$overall #decision tree
+cm2new$overall #gbm
+cm3new$overall #random forest
+cm4new$overall #naive Bayes
+cm5new$overall #svm
+cm6new$overall #multinom
+
+
+############################## Time taken by each model, with cv and without cv as well######################
+
+time.taken1new
+time.taken2new
+time.taken3new
+time.taken4new
+time.taken5new
+time.taken6new
+time.taken7new
+time.taken8new
+time.taken9new
+time.taken10new
+time.taken11new
+```
