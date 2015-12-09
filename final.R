@@ -1,8 +1,7 @@
 ---
 title: "soccerproject"
 author: "Neeraj"
-date: "Sunday, November 22, 2015"
-output: html_document
+date: "December 7, 2015"
 ---
 
 
