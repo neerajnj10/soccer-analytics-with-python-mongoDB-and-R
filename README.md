@@ -1,7 +1,6 @@
 # soccer-analytics-with-python-mongoDB-elasticsearch-R
 Using **Python**, **NoSQL** (`mongoDB` & `elasticsearch`) and **R** for pipeline structure
 
-- The project is On-going... and would be updated here accordingly.
 
 This project is an idea put at work on pipe-lining individual tools/languages and skills for extracting the maximum capabilities of each of them. The languages used are `Python`, `NoSQl`, and `R` programming. 
 
