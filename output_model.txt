@@ -1,6 +1,6 @@
 soccerproject
 Neeraj
-Sunday, November 22, 2015
+
 ## Warning: package 'elastic' was built under R version 3.2.2
 ## url:       http://127.0.0.1 
 ## port:      9200 
