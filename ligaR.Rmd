@@ -1,6 +1,6 @@
 #Final.
 
-Entire analysis with output is published here. ![liga](http://rpubs.com/nj_neeraj10/soccer)
+Entire analysis with output is published here. [liga](http://rpubs.com/nj_neeraj10/soccer)
 
 ### Using R to do Data analysis and Modelling.
 
