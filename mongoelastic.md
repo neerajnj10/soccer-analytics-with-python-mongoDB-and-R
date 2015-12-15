@@ -185,17 +185,43 @@ mongo-connector -m localhost:27017 -t localhost:9200 -d <your-doc-manager-folder
 
 # Working in elastic search with command line once teh data is passed.
 
-```
-#start with elasticsearch directory, and go to bin:
+start with elasticsearch directory, and go to bin:
 Run- elasticsearc.bat
 # this will start es instance.
+ElasticSearch is now running! You can access it at http://localhost:9200 on your web browser, which returns this:
+```
+{
+  "status" : 200,
+  "name" : "Random names",
+  "cluster_name" : "elasticsearch",
+  "version" : {
+    "number" : "2.0.0",
+    "build_hash" : "e43676b1385b8125d647f593f7202acbd816e8ec",
+    "build_timestamp" : "2015-something",
+    "build_snapshot" : false,
+    "lucene_version" : "something"
+  },
+  "tagline" : "You Know, for Search"
+}
+```
+
+```
 go to bin again, and start writing queries or download Kibana
 
 # query for documents / rows with AwayTeam field containing 'Barcelona'
 # added pretty=true to get the json results pretty printed
 
+curl -XGET 'http://localhost:9200/_search?q=Awayteam:Barcelona&size=5&pretty=true
+#this will retur a pretty amazing looking json document.
 
-curl {endpoint}/_search?q=Awayteam:Barcelona&size=5&pretty=true
 ```
+
+All posts which don't contain the term search: just reuires putting `-` sign 
+
+
+```
+curl -XGET 'http://localhost:9200/_search?q=-Awayteam:Barcelona&size=5&pretty=true
+```
+- you just learned basics of how to work with elastic search! Great.
 
 > In next section, we will work on elasticsearch but with R. R provides ease of use and quick retreival of data.
