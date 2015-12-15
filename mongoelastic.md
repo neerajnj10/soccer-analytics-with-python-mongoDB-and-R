@@ -181,3 +181,14 @@ old usage (before 2.0 release):
 ```
 mongo-connector -m localhost:27017 -t localhost:9200 -d <your-doc-manager-folder>/elastic_doc_manager.py
 ```
+
+
+# Working in elastic search with command line once teh data is passed.
+
+```
+#start with elasticsearch directory, and go to bin:
+Run- **elasticsearc.bat**
+# this will start es instance.
+go to bin again, and start writing queries or download **Kibana**
+
+```
