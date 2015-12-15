@@ -30,7 +30,7 @@ We are going to be creating a lot of windows for this tutorial, to simulate diff
 
 - Start by creating 3 data directories off of your MongoDB directory (or somewhere else if you prefer):
 
-`C:\MongoDB>md data1 ` 
+`C:\MongoDB>md data1 `  #this would be the primary data store directory (or either one of the three)
 `C:\MongoDB>md data2 ` 
 `C:\MongoDB>md data3 `
 
@@ -41,8 +41,11 @@ We are going to be creating a lot of windows for this tutorial, to simulate diff
 - Open another command prompt. We will use this window to query our first instance.
 
 `C:\MongoDB>bin\mongo --port 27017` 
+
+```
 MongoDB shell version: 3.0.5  
 connecting to: 127.0.0.1:27017/test 
+```
 
 **Remember** :
 This above mongodb instance on data1 needs to run before we transfer the data from python `pymongo`. So now we are connected to our MongoDB server running on port 27017. we insert the document like previously.
@@ -59,12 +62,17 @@ Go to your command window: Start mongo shell like before and run following comma
 
 > rs.initiate() 
 
+```
 {
   "info2" : "no configuration explicitly specified -- making one",
-  "me" : "Alex-Yoga2:27021",
+  "me" : "Neeraj:27021",
   "ok" : 1
 }
+
 mySet:OTHER>  
+```
+
+
 Note that command prompt has changed to show we are part of set now, and it says "OTHER"
 On this, query the document stored, in our case, `spainsoccer` db and `liga_data` the collection.
 So, `db.liga_data.find()`
@@ -72,26 +80,30 @@ So, `db.liga_data.find()`
 Our query works, and now the command prompt now says "PRIMARY" because the replication magic has decided that we are now the master. This is important to know. If all of your replication members die but one, you can still keep operating.
 
 Next, we will run the command that you will run the most often in relations to replica sets - rs.status;
+```
 Run:
 mySet:PRIMARY> `rs.status()`
-
+```
 
 # Adding replica members now.
 
 Open 2 more command prompt windows and start 2 new instances of MongoDB like this:
-
+```
 `C:\MongoDB>bin\mongod --dbpath data2 --port 27018 --replSet mySet  `
 
 `C:\MongoDB>bin\mongod --dbpath data3 --port 27020 --replSet mySet  `
+```
 
 This is effectively the same thing as running MongoDB on three machines, since we have three different data directories and three different ports.
 
 So we have three servers now, all ready to be part of a replica set, but only one of those is actually part of it. You force the other ones to join by issuing commands on the master.
 Go back to the master mongo shell above and run following:
 
+```
 mySet:PRIMARY> rs.add('Neeraj:27018')  
 
 { "ok" : 1 }
+```
 
 The reason we have to do this is that MongoDB is picky about using multiple 'localhost' names in a replica set. That won't be an issue in a real deployment. Now if you run rs.status you will see the new member markes as `Secondary` which means first replica has been made for theport `27017`.
 
@@ -99,20 +111,26 @@ Open up a new query window so we can see:
 mongo shell for the secondary set member.
 
 `C:\MongoDB>bin\mongo --port 27018  `
-
+```
 MongoDB shell version: 3.0.5  
 connecting to: 127.0.0.1:27018/test  
 mySet:SECONDARY> db.use() # to use the databse we have created already and then db.liga_data.find()
+```
 
 Notice above command would give **error**, because mongodbreally wants us to stick to the master. We can get around that, though:
+```
 run this :
 `mySet:SECONDARY> rs.slaveOk() `
+```
 
 This makes our secondary set `27018` ready to share the data from master and We told MongoDB that we are ok with querying slaves. 
 
 Again go back to the primary mongo shell of 27017 port, the master and run following:
-mySet:PRIMARY> rs.add('Neeraj:27020') $add another member .
+
+```
+mySet:PRIMARY> rs.add('Neeraj:27020') #add another member .
 and again open the secondary shell for port `27020`,a nd run slavOk() command.
+```
 
 Now we have 3 replica sets running on primary port shared by secondary ports. 
 
