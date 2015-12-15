@@ -70,7 +70,7 @@ Variables | Description
 
 
 
-```{r, echo=TRUE,eval=TRUE}
+```{r, echo=TRUE,eval=TRUE, warning=FALSE, message=FALSE}
 library(reshape2)
 library(lubridate)
 library(RJSONIO)
@@ -156,7 +156,7 @@ some of the variables are slightly correlated (however it depends on the thresho
 
 ## further exploring the data
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 
 ggplot(liga, aes(x=FTR)) + geom_histogram(binwidth=5)
 
@@ -224,6 +224,15 @@ liga$Date <- d4
 # dividing dataset into training, validation and testing dataset.
 # we will want to predict results for current season correctly, so we will choose it as test dataset. Current season starts from month of august, hence we will subset this data.
 
+
+## =============================================================================
+## Normalise Data
+## =============================================================================
+
+## Pre-process predictors
+pp <- preProcess(liga, method = c("center", "scale", "BoxCox"))
+liga <- predict(pp, liga)
+
 liga$FTHG <- NULL
 liga$FTAG <- NULL
 liga$HomeWinodd <- NULL
@@ -277,7 +286,7 @@ title(main="Principal Components")
 ## Building the model.
 
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 options(warn=-1)
 # Reset the random number seed to obtain the same results each time.
 
@@ -518,7 +527,7 @@ overallnb
 
 #tuning- cross validation for each model.
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 library(snowfall)
 sfInit (parallel=TRUE , cpus=5)
 
@@ -532,7 +541,8 @@ end.time <- Sys.time()
 time.taken6 <- end.time - start.time
 
 fit1
-p1 <- predict(fit1, newdata=liga_test, type="raw")
+p1 <- predict(fit1, newdata=liga_test)
+p1prob <- predict(fit1, newdata=liga_test, type="prob")
 cm1 <- confusionMatrix(p1, liga_test$FTR)
 cm1 #tuning improved the performance of the decision tree. It is similar to random forest, multinom, and svm.
 
@@ -625,7 +635,7 @@ sfStop()
 ## Model Selection.
 
 
-- We noticed while the performance of `Random forest`, `SVM`, `Decision Tree` and `Multinom` was same for original model, on cross validation, decidion tree proved to be better than the rest, much of wwhich could be attributed to the size of the data.
+- We noticed, on cross validation, decidion tree proved to be better than the rest, much of wwhich could be attributed to the size of the data.
 
 - accuracy and kappa values.
 
@@ -664,13 +674,6 @@ time.taken11
 
 
 > We will therefore use `Cross validated Decision Tree for our prediction` that has accuracy of aaaround 71% on test set
-
-
-```{r}
-#Decion tree.
-
-#liga_test$PredictedFTRWhenHTRisknown <- as.matrix(p1)
-```
 
 
 
@@ -1015,6 +1018,7 @@ end.time <- Sys.time()
 time.taken11new <- end.time - start.time
 fit6new
 p6new <- predict(fit6new, newdata=liga_test)
+p6newprob <- predict(fit6new, newdata=liga_test, type="prob")
 cm6new <- confusionMatrix(p6new, liga_test$FTR)
 cm6new
 sfStop()
@@ -1056,3 +1060,12 @@ time.taken11new
 
 > for second model we will select GLM-Generlized liner (multinomial) model.
 
+## Final results.
+
+```{r}
+liga_test$PredictedFTRWhenHTRisknown <- as.data.frame(p1)
+liga_test$PredictedFTRWhenHTRisUnknown <- as.data.frame(p6new) 
+liga_test$PredictedFTRWhenHTRisknownProb <- as.data.frame(p1prob) #probabilities for lose, win or draw for away of home
+liga_test$PredictedFTRWhenHTRisUnknownProb <- as.data.frame(p6newprob) #predicted probs for lose, win or draw for away or home
+liga_test
+```
