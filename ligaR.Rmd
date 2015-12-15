@@ -3,9 +3,15 @@
 
 ### Using R to do Data analysis and Modelling.
 
-----------------------------------------------------
+---
+title: "soccerproject"
+author: "Neeraj"
+date: "December 7, 2015"
+---
 
-```{r, echo=FALSE,eval=TRUE}
+
+
+```{r}
 #install.packages("elastic")
 library('elastic')
 
@@ -69,7 +75,7 @@ Variables | Description
 
 
 
-```{r, echo=FALSE,eval=TRUE,warning=FALSE}
+```{r, echo=TRUE,eval=TRUE, warning=FALSE, message=FALSE}
 library(reshape2)
 library(lubridate)
 library(RJSONIO)
@@ -100,7 +106,7 @@ we will change the date variable from char to date format.
 
 
 
-```{r,echo=FALSE,eval=TRUE}
+```{r}
 str(liga)
 summary(liga)
 #liga$Date <- ymd(liga$Date) #POSIXct format object, which works with both factors or characters
@@ -118,7 +124,7 @@ The summary shows we do not have ANY missing values, which is a good sign.
 
 
 
-```{r,echo=FALSE,eval=TRUE}
+```{r}
 #correlation plot
 
 # for this purpose we will subset the  numeric variables first.
@@ -155,7 +161,7 @@ some of the variables are slightly correlated (however it depends on the thresho
 
 ## further exploring the data
 
-```{r,echo=FALSE,eval=TRUE}
+```{r, message=FALSE, warning=FALSE}
 
 ggplot(liga, aes(x=FTR)) + geom_histogram(binwidth=5)
 
@@ -171,7 +177,7 @@ ggplot(liga, aes(log(B365A),log(B365H), color=FTR)) + geom_point() + geom_smooth
 
 ## Creating derived new metrics, by executing operations on various columns, and cleaning data (removing redundant variables).
 
-```{r,echo=FALSE,eval=TRUE}
+```{r}
 #We create the target variable, `winner` for each match. This will be used in our model for prediction.
 
 #liga$winner[liga$FTR=="H"]<- 1 #when home team wins
@@ -195,7 +201,7 @@ liga$B365D<- NULL
 
 
 
-```{r,echo=FALSE,eval=TRUE}
+```{r}
 
 p <- ggplot(liga, aes(HR, AR),colour = factor(FTR)) + geom_point()
 # With one variable
@@ -213,7 +219,7 @@ p + facet_grid(. ~ FTR)
 
 #create training and test dataset
 
-```{r,echo=FALSE,eval=TRUE}
+```{r}
 # now final selection of the variables.
 
 d4 <- as.Date(liga$Date, "%d/%m/%y")
@@ -222,6 +228,15 @@ liga$Date <- d4
 
 # dividing dataset into training, validation and testing dataset.
 # we will want to predict results for current season correctly, so we will choose it as test dataset. Current season starts from month of august, hence we will subset this data.
+
+
+## =============================================================================
+## Normalise Data
+## =============================================================================
+
+## Pre-process predictors
+pp <- preProcess(liga, method = c("center", "scale", "BoxCox"))
+liga <- predict(pp, liga)
 
 liga$FTHG <- NULL
 liga$FTAG <- NULL
@@ -238,7 +253,7 @@ liga_test <- liga_test[-c(1,2,3)]
 
 ## Pre-model building.
 
-```{r,echo=FALSE,eval=TRUE}
+```{r}
 library(colorspace)
 numeric <- liga_train[-c(1,4)]
 
@@ -276,7 +291,7 @@ title(main="Principal Components")
 ## Building the model.
 
 
-```{r,echo=FALSE,eval=TRUE}
+```{r, warning=FALSE, message=FALSE}
 options(warn=-1)
 # Reset the random number seed to obtain the same results each time.
 
@@ -448,7 +463,7 @@ print(Anova(liga_glm))
 ## Evaluate model performance. 
 
 
-```{r,eval=TRUE,echo=FALSE}
+```{r}
 liga_test$HTR <- as.factor(liga_test$HTR)
 liga_test$FTR <- as.factor(liga_test$FTR)
 # Generate an Error Matrix for the Decision Tree model.
@@ -517,7 +532,7 @@ overallnb
 
 #tuning- cross validation for each model.
 
-```{r,echo=FALSE,eval=TRUE}
+```{r, warning=FALSE, message=FALSE}
 library(snowfall)
 sfInit (parallel=TRUE , cpus=5)
 
@@ -531,7 +546,8 @@ end.time <- Sys.time()
 time.taken6 <- end.time - start.time
 
 fit1
-p1 <- predict(fit1, newdata=liga_test, type="raw")
+p1 <- predict(fit1, newdata=liga_test)
+p1prob <- predict(fit1, newdata=liga_test, type="prob")
 cm1 <- confusionMatrix(p1, liga_test$FTR)
 cm1 #tuning improved the performance of the decision tree. It is similar to random forest, multinom, and svm.
 
@@ -624,11 +640,11 @@ sfStop()
 ## Model Selection.
 
 
-- We noticed while the performance of `Random forest`, `SVM`, `Decision Tree` and `Multinom` was same for original model, on cross validation, decidion tree proved to be better than the rest, much of wwhich could be attributed to the size of the data.
+- We noticed, on cross validation, decidion tree proved to be better than the rest, much of wwhich could be attributed to the size of the data.
 
 - accuracy and kappa values.
 
-```{r, echo=FALSE,eval=TRUE}
+```{r}
 overallcm
 overallkvsm
 overallrfcm
@@ -646,7 +662,7 @@ cm6$overall #glm
 
 - Time taken by each model, with cv and without cv as well.
 
-```{r, echo=FALSE,eval=TRUE}
+```{r}
 
 time.taken1
 time.taken2
@@ -665,18 +681,11 @@ time.taken11
 > We will therefore use `Cross validated Decision Tree for our prediction` that has accuracy of aaaround 71% on test set
 
 
-```{r}
-#Decion tree.
-
-#liga_test$PredictedFTRWhenHTRisknown <- as.matrix(p1)
-```
-
-
 
 ### Our second model (additional model), is based on the situation when wwe do not have half time results as well, or half time goals, from each team. Above model is valuable when we want to predict for a winner withh half time results. Lets try without those results, and see how accurately we ccan then predict for a winner of a match at the start. For this we will remove HTHG, HTAG, HTR from our selected features(predictors.) in both train and test data set.
 
 
-```{r, eval=TRUE,echo=FALSE}
+```{r}
 #### improvising features. 
 
 
@@ -1014,6 +1023,7 @@ end.time <- Sys.time()
 time.taken11new <- end.time - start.time
 fit6new
 p6new <- predict(fit6new, newdata=liga_test)
+p6newprob <- predict(fit6new, newdata=liga_test, type="prob")
 cm6new <- confusionMatrix(p6new, liga_test$FTR)
 cm6new
 sfStop()
@@ -1055,3 +1065,12 @@ time.taken11new
 
 > for second model we will select GLM-Generlized liner (multinomial) model.
 
+## Final results.
+
+```{r}
+liga_test$PredictedFTRWhenHTRisknown <- as.data.frame(p1)
+liga_test$PredictedFTRWhenHTRisUnknown <- as.data.frame(p6new) 
+liga_test$PredictedFTRWhenHTRisknownProb <- as.data.frame(p1prob) #probabilities for lose, win or draw for away of home
+liga_test$PredictedFTRWhenHTRisUnknownProb <- as.data.frame(p6newprob) #predicted probs for lose, win or draw for away or home
+liga_test
+```
