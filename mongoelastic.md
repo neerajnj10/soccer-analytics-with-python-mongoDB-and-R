@@ -187,8 +187,15 @@ mongo-connector -m localhost:27017 -t localhost:9200 -d <your-doc-manager-folder
 
 ```
 #start with elasticsearch directory, and go to bin:
-Run- **elasticsearc.bat**
+Run- elasticsearc.bat
 # this will start es instance.
-go to bin again, and start writing queries or download **Kibana**
+go to bin again, and start writing queries or download Kibana
 
+# query for documents / rows with AwayTeam field containing 'Barcelona'
+# added pretty=true to get the json results pretty printed
+
+
+curl {endpoint}/_search?q=Awayteam:Barcelona&size=5&pretty=true
 ```
+
+> In next section, we will work on elasticsearch but with R. R provides ease of use and quick retreival of data.
