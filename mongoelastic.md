@@ -30,10 +30,8 @@ We are going to be creating a lot of windows for this tutorial, to simulate diff
 
 - Start by creating 3 data directories off of your MongoDB directory (or somewhere else if you prefer):
 
-(this would be the primary data store directory (or either one of the three))
-
 ```
-`C:\MongoDB>md data1 `  
+C:\MongoDB>md data1 (this would be the primary data store directory)
 ```
 
 `C:\MongoDB>md data2 ` 
@@ -41,7 +39,9 @@ We are going to be creating a lot of windows for this tutorial, to simulate diff
 
 - Start an instance of MongoDB like this:
 
-`C:\MongoDB>bin\mongod --dbpath data1 --port 27017  `
+``
+`C:\MongoDB>bin\mongod --dbpath data1 --port 27017` (this should be started whe we are using oython code for transferring data from python to mongodb)
+``
 
 - Open another command prompt. We will use this window to query our first instance.
 
@@ -110,7 +110,7 @@ mySet:PRIMARY> rs.add('Neeraj:27018')
 { "ok" : 1 }
 ```
 
-The reason we have to do this is that MongoDB is picky about using multiple 'localhost' names in a replica set. That won't be an issue in a real deployment. Now if you run rs.status you will see the new member markes as `Secondary` which means first replica has been made for theport `27017`.
+The reason we have to do this is that MongoDB is picky about using multiple 'localhost' names in a replica set. That won't be an issue in a real deployment. Now if you run rs.status you will see the new member markes as `Secondary` which means first replica has been made for the port `27017`.
 
 Open up a new query window so we can see:
 mongo shell for the secondary set member.
