@@ -30,7 +30,12 @@ We are going to be creating a lot of windows for this tutorial, to simulate diff
 
 - Start by creating 3 data directories off of your MongoDB directory (or somewhere else if you prefer):
 
-`C:\MongoDB>md data1 `  #this would be the primary data store directory (or either one of the three)
+(this would be the primary data store directory (or either one of the three))
+
+```
+`C:\MongoDB>md data1 `  
+```
+
 `C:\MongoDB>md data2 ` 
 `C:\MongoDB>md data3 `
 
