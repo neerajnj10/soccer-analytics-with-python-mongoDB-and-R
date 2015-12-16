@@ -7,8 +7,6 @@ output:
     theme: cerulean
 ---
 
-> The entire code and step wise work is given here on github profile- [Socceranalytics](https://github.com/neerajnj10/soccer-analytics-with-python-mongoDB-and-R)
-
 # Predicting the Laliga Men's Division -I Football season 2015/2016
 
 -------------------------------------------------------------------------------------------
