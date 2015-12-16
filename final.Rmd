@@ -1,12 +1,12 @@
 #Final.
 
-Entire analysis with output is published here. [liga_published](http://rpubs.com/nj_neeraj10/soccer)
+Entire analysis with output is published here. Go here to get all the details of the model. [Liga_Published](http://rpubs.com/nj_neeraj10/soccer)
 
 ### Using R to do Data analysis and Modelling.
 
 ---
-title: "soccerproject"
-author: "Neeraj"
+
+author: Neeraj
 
 ---
 
