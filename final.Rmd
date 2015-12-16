@@ -1165,6 +1165,35 @@ liga_test <- as.data.frame(c(liga_test, lig))
 liga_test <- liga_test[, c(1, 14:24)]
 head(liga_test)
 
+```
+
+```
+FTR p5 p5new PredictedFTRProbWhenHTRisknown.A PredictedFTRProbWhenHTRisknown.D PredictedFTRProbWhenHTRisknown.H
+1   D  D     A                        0.3175107                       0.38527311                      0.297216146
+2   A  D     A                        0.3539532                       0.40278740                      0.243259361
+3   D  D     D                        0.2983670                       0.49595873                      0.205674279
+4   D  A     H                        0.6413772                       0.22022013                      0.138402709
+5   H  H     H                        0.1149321                       0.29441837                      0.590649528
+6   A  A     A                        0.9388621                       0.05450384                      0.006634032
+  PredictedFTRProbWhenHTRisUnknown.A PredictedFTRProbWhenHTRisUnknown.D PredictedFTRProbWhenHTRisUnknown.H
+1                          0.3672793                          0.2605115                         0.37220919
+2                          0.3918856                          0.2878935                         0.32022088
+3                          0.3872056                          0.4117744                         0.20102002
+4                          0.2738267                          0.3096866                         0.41648670
+5                          0.3115845                          0.3400149                         0.34840060
+6                          0.8488061                          0.1140005                         0.03719338
+      B365H     B365A     B365D
+1 0.2777778 0.4878049 0.2857143
+2 0.1538462 0.6666667 0.2309469
+3 0.5405405 0.2222222 0.2857143
+4 0.2105263 0.5714286 0.2666667
+5 0.4347826 0.3125000 0.3030303
+6 0.4761905 0.2857143 0.2857143
+```
+
+
+```{r}
+
 #plotting the comparison between our predicted class with that of actual class( this is indirect visualization of confusion matrix in a way.)
 
 
