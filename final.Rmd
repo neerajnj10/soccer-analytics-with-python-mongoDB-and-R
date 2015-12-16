@@ -1,6 +1,6 @@
 #Final.
 
-Entire analysis with output is published here. Go here to get all the details of the model. [Liga_Published](http://rpubs.com/nj_neeraj10/soccer)
+Entire analysis with output is published here. Please follow along this link to get all the details of the model produced using R. [Liga_Published](http://rpubs.com/nj_neeraj10/soccer)
 
 ### Using R to do Data analysis and Modelling.
 
