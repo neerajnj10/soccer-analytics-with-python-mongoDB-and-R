@@ -5,7 +5,7 @@ Entire analysis with output is published here. [liga_published](http://rpubs.com
 ### Using R to do Data analysis and Modelling.
 
 ---
-author: "Neeraj"
+author: Neeraj
 ---
 
 ---------------------------------------------------
