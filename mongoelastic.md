@@ -39,9 +39,9 @@ C:\MongoDB>md data1 (this would be the primary data store directory)
 
 - Start an instance of MongoDB like this:
 
-``
-`C:\MongoDB>bin\mongod --dbpath data1 --port 27017` (this should be started whe we are using oython code for transferring data from python to mongodb)
-``
+```
+C:\MongoDB>bin\mongod --dbpath data1 --port 27017 (this should be started whe we are using oython code for transferring data from python to mongodb)
+```
 
 - Open another command prompt. We will use this window to query our first instance.
 
