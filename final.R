@@ -1,9 +1,11 @@
 ---
 title: "soccerproject"
 author: "Neeraj"
-date: "December 7, 2015"
+
 ---
 
+-------------------------------------------------------------------------
+-------------------------------------------------------------------------
 
 
 ```{r}
@@ -188,9 +190,6 @@ liga$HomeWinodd <- odds.dec2prob(liga$B365H)
 liga$AwayWinodd <- odds.dec2prob(liga$B365A)
 liga$Drawodd <- odds.dec2prob(liga$B365D)
 #now we can use betting data in two ways- we can either keep it and include in our model to estimate winning team once we know the betting estimates from the experts or we can exclude it from the current model and utilize it at the end to make comparison with our estimates for win, draw or loss.
-liga$B365H <- NULL
-liga$B365A <- NULL
-liga$B365D<- NULL
 ```
 
 
@@ -223,6 +222,9 @@ liga$Date <- d4
 
 # dividing dataset into training, validation and testing dataset.
 # we will want to predict results for current season correctly, so we will choose it as test dataset. Current season starts from month of august, hence we will subset this data.
+liga$B365H <- NULL
+liga$B365A <- NULL
+liga$B365D<- NULL
 
 
 ## =============================================================================
@@ -310,6 +312,7 @@ printcp(liga_dt)
 # Plot the resulting Decision Tree. 
 # We use the rpart.plot package.
 library(rattle)
+library(rpart.plot)
 fancyRpartPlot(liga_dt, main="Decision Tree- FTR")
 
 # List the rules from the tree using a Rattle support function.
@@ -326,6 +329,8 @@ asRules(liga_dt)
 
 liga_train$HTR <- as.factor(liga_train$HTR)
 liga_train$FTR <- as.factor(liga_train$FTR)
+liga_test$HTR <- as.factor(liga_test$HTR)
+liga_test$FTR <- as.factor(liga_test$FTR)
 
 start.time <- Sys.time() 
 set.seed(1234)
@@ -359,7 +364,7 @@ title(main="Error Rates Random Forest")
 
 # Display tree number 1.
 
-printRandomForests(liga_rf, 1)
+#printRandomForests(liga_rf, 1)
 
 # Plot the OOB ROC curve.
 
@@ -393,8 +398,6 @@ liga_ksvm
 # Generalized Boosted Regression Models (gbm) model.
 
 
-liga_train$HTR <- as.factor(liga_train$HTR)
-liga_train$FTR <- as.factor(liga_train$FTR)
 liga_gbm <- gbm(FTR~., data = liga_train, distribution= "multinomial",n.trees=100, shrinkage= 0.05,
                 interaction.depth=3, cv.folds=3, verbose=FALSE,n.cores=1)
 liga_gbm
@@ -450,15 +453,10 @@ print(Anova(liga_glm))
 ```
 
 
+```
+## Making prediction on test set. 
 
 
-
-
-
-## Evaluate model performance. 
-
-
-```{r}
 liga_test$HTR <- as.factor(liga_test$HTR)
 liga_test$FTR <- as.factor(liga_test$FTR)
 # Generate an Error Matrix for the Decision Tree model.
@@ -525,9 +523,14 @@ overallnb
 
 
 
-#tuning- cross validation for each model.
+# Evaluating the models- tuning- cross validation for each model.
+
+- Decision tree.
 
 ```{r, warning=FALSE, message=FALSE}
+liga_test[, 'FTR'] <- as.factor(liga_test[, 'FTR'])
+liga_train[, 'FTR'] <- as.factor(liga_train[, 'FTR'])
+
 library(snowfall)
 sfInit (parallel=TRUE , cpus=5)
 
@@ -536,144 +539,172 @@ sfInit (parallel=TRUE , cpus=5)
 start.time <- Sys.time()  
 set.seed(2) 
 fit1 <- train(FTR ~ ., data = liga_train, method = "rpart", tuneLength = 30, 
-      trControl = trainControl(method = "repeatedcv", repeats = 3))
+      trControl = trainControl(method = "cv", repeats = 1, number = 5))
 end.time <- Sys.time()  
 time.taken6 <- end.time - start.time
 
 fit1
-p1 <- predict(fit1, newdata=liga_test)
-p1prob <- predict(fit1, newdata=liga_test, type="prob")
-cm1 <- confusionMatrix(p1, liga_test$FTR)
-cm1 #tuning improved the performance of the decision tree. It is similar to random forest, multinom, and svm.
 
-
+trellis.par.set(caretTheme())
 plot(fit1, metric= "Kappa")
 plot(fit1, metric= "Accuracy")
 
 sfStop()
+
+```
+
+
+- GBM
+
+```{r}
+set.seed(4678)
 sfInit (parallel=TRUE , cpus=5)
 start.time <- Sys.time()  
 fit2 <- train(FTR ~ ., data = liga_train, method = "gbm",verbose = FALSE, trControl = trainControl(## 5-fold CV
-                           method = "repeatedcv",
+                           method = "cv",
                            number =5,
-                           ## repeated ten times
-                           repeats = 5))
+                           repeats = 1))
 end.time <- Sys.time()  
 time.taken7 <- end.time - start.time
 
 fit2
-p2 <- predict(fit2, newdata=liga_test)
-cm2 <- confusionMatrix(p2, liga_test$FTR)
-cm2
+
+trellis.par.set(caretTheme())
 plot(fit2, metric="Kappa")
 plot(fit2, metric="Accuracy")
 
 sfStop()
-sfInit (parallel=TRUE , cpus=5)
-start.time <- Sys.time()  
+```
 
-fit3 <- train(FTR ~ ., data = liga_train, method = "rf",ntree=500, importance=TRUE, 
-              trControl=trainControl(method = "cv",  
-                           number = 5,
-                           repeats = 1, selectionFunction = "oneSE"),
-                prox=TRUE,allowParallel=TRUE)
+
+- Random Forest
+
+```{r}
+sfInit (parallel=TRUE , cpus=5)
+set.seed(238)
+start.time <- Sys.time()  
+  
+fit3 <- train(FTR ~ ., data = liga_train, method = "rf", importance=TRUE, 
+                trControl=trainControl(method = "cv",  
+                             number = 5,
+                             repeats = 1, selectionFunction = "oneSE"),
+                  prox=TRUE, allowParallel=TRUE)
 end.time <- Sys.time()  
 time.taken8 <- end.time - start.time
 fit3
-p3 <- predict(fit3, newdata=liga_test)
-cm3 <- confusionMatrix(p3, liga_test$FTR)
-cm3
-
+  
+trellis.par.set(caretTheme())
 plot(fit3, metric="Kappa")
 plot(fit3, metric="Accuracy")
-
+  
 sfStop()
+
+```
+
+
+- Naive bayes
+
+
+```{r}
 sfInit (parallel=TRUE , cpus=5)
+set.seed(456)  
 start.time <- Sys.time()  
 
-fit4 <- train( FTR ~ ., data = liga_train, method = "nb", trControl = trainControl(method = "cv", number = 10)) 
+fit4 <- train( FTR ~ ., data = liga_train, method = "nb", trControl = trainControl(method = "cv", number = 5, repeats= 1)) 
 end.time <- Sys.time()  
 time.taken9 <- end.time - start.time
 fit4
-p4 <- predict(fit4, newdata=liga_test)
-cm4 <- confusionMatrix(p4, liga_test$FTR)
-cm4
+
 
 plot(fit4, metric="Kappa")
 plot(fit4, metric="Accuracy")
 
 sfStop()
+
+```
+
+
+- svm
+
+```{r}
+
 sfInit (parallel=TRUE , cpus=5)
+set.seed(765)
 start.time <- Sys.time()  
 
-fit5 <- train(FTR ~ ., data = liga_train, method = "svmLinear", tuneLength = 30, trControl =trainControl(method = "repeatedcv", repeats = 3))
+fit5 <- train(FTR ~ ., data = liga_train, method = "svmLinear",  tuneLength = 30, trControl =trainControl(method = "cv", repeats = 1, number=5))
 end.time <- Sys.time()  
 time.taken10 <- end.time - start.time
 fit5
-p5 <- predict(fit5, newdata=liga_test)
-cm5 <- confusionMatrix(p5, liga_test$FTR)
-cm5
 
-sfStop()
-sfInit (parallel=TRUE , cpus=5)
-start.time <- Sys.time()  
+#plot.train(fit5, metric="Kappa")
+#plot(fit5, metric="Accuracy")
 
-fit6 <- train(FTR ~ ., data = liga_train, method = "multinom", maxit=1000, tuneLength=1, trControl = trainControl(method = "cv", number=10, savePredictions=TRUE))
-end.time <- Sys.time()  
-time.taken11 <- end.time - start.time
-fit6
-p6 <- predict(fit6, newdata=liga_test)
-cm6 <- confusionMatrix(p6, liga_test$FTR)
-cm6
 sfStop()
 ```
 
 
-- We tried to tune and see if our model was under or over fit. Cross validation procedure produced similar results as were seen from original model.
+
+- Multinom GLM
+
+
+```{r}
+sfInit (parallel=TRUE , cpus=5)
+set.seed(239)
+start.time <- Sys.time()  
+
+fit6 <- train(FTR ~ ., data = liga_train, method = "multinom", maxit=1000, tuneLength=1, trControl = trainControl(method = "cv", number=5,repeats=1, savePredictions=TRUE))
+end.time <- Sys.time()  
+time.taken11 <- end.time - start.time
+fit6
+
+sfStop()
+```
+
+
+
+- We tried to tune and see if our model was under or over fit.
 
 
 ## Model Selection.
 
-
-- We noticed, on cross validation, decidion tree proved to be better than the rest, much of wwhich could be attributed to the size of the data.
-
-- accuracy and kappa values.
+- Since models are fit on the same versions of the training data, it makes sense to make inferences on the differences between models. In this way we reduce the within-resample correlation that may exist. We can compute the differences as well, for t-test.
 
 ```{r}
-overallcm
-overallkvsm
-overallrfcm
-overallg
-overallnb
-cm1$overall #decision tree
-cm2$overall #gbm
-cm3$overall #random forest
-cm4$overall #naive Bayes
-cm5$overall #svm
-cm6$overall #glm
+# statistical statements about their performance differences. 
+
+results <- resamples(list(DT=fit1, GBM=fit2, RF= fit3,NB= fit4, SVM=fit5, GLM= fit6))
+summary(results)
+bwplot(results)
+dotplot(results)
+splom(results)
+
+#more direct comparison.
+#  t-test to evaluate the null hypothesis that there is no difference between models.
+difValues <- diff(results)
+summary(difValues)
+bwplot(difValues)
+trellis.par.set(caretTheme())
+dotplot(difValues)
 
 ```
 
 
-- Time taken by each model, with cv and without cv as well.
+- Based on several techniques implemented above for accuracy and kappa values of each model, and comparing their performances it is found **Linear - SVM** performances better than the other models, both in accuracy as well as kappa values, we will therefore use it for **test** dataset to get our results.
 
+
+## testing on test set for selected model (SVM)
 ```{r}
-
-time.taken1
-time.taken2
-time.taken3
-time.taken4
-time.taken5
-time.taken6
-time.taken7
-time.taken8
-time.taken9
-time.taken10
-time.taken11
+p5 <- predict(fit5, newdata=liga_test) #svm
+cm5 <- confusionMatrix(p5, liga_test$FTR)
+cm5
+set.seed(75555)
+fit5prob <- train(FTR ~ ., data = liga_train, method = "svmLinear",  tuneLength = 30, 
+                  trControl =trainControl(classProbs = T, method = "cv", repeats = 1, number=5))
+p5prob <- predict(fit5prob, newdata=liga_test, type="prob") #svm prob
+p5prob
 ```
 
-
-> We will therefore use `Cross validated Decision Tree for our prediction` that has accuracy of aaaround 71% on test set
 
 
 
@@ -852,11 +883,12 @@ cat('==== ANOVA ====')
 print(Anova(liga_glmnew))
 
 
+```
 
-############################################## Evaluate model performance######################################
 
 
-# Generate an Error Matrix for the Decision Tree model.
+```
+##making predictions on test set.
 
 # Obtain the response from the Decision Tree model.
 
@@ -915,51 +947,64 @@ nbcmnew
 #View(data.frame(cbind(as.matrix(nb_pr))[,1], as.matrix(liga_test$FTR))) #important.
 overallnbnew <- nbcmnew$overall
 overallnbnew
+```
+
+# Evaluating the models- tuning- cross validation for each model and testing it.
 
 
-#######################################tuning- cross validation for each model#############################
+
+- Decision Tree.
+
+
+```{r}
 
 sfInit (parallel=TRUE , cpus=5)
+set.seed(567)
 start.time <- Sys.time()  
 set.seed(2) 
 fit1new <- train(FTR ~ ., data = liga_train, method = "rpart", tuneLength = 30, 
-      trControl = trainControl(method = "repeatedcv", repeats = 3))
+      trControl = trainControl(method = "cv",number= 5, repeats = 1))
 end.time <- Sys.time()  
 time.taken6new <- end.time - start.time
 
 fit1new
-p1new <- predict(fit1new, newdata=liga_test, type="raw")
-cm1new <- confusionMatrix(p1new, liga_test$FTR)
-cm1new 
-
 
 plot(fit1new, metric= "Kappa")
 plot(fit1new, metric= "Accuracy")
 
 sfStop()
+```
 
+
+- GBM
+
+```{r}
 sfInit (parallel=TRUE , cpus=5)
+set.seed(879)
 start.time <- Sys.time()  
 fit2new <- train(FTR ~ ., data = liga_train, method = "gbm",verbose = FALSE, trControl = trainControl(## 5-fold CV
-                           method = "repeatedcv",
+                           method = "cv",
                            number =5,
                            ## repeated ten times
-                           repeats = 5))
+                           repeats = 1))
 end.time <- Sys.time()  
 time.taken7new <- end.time - start.time
 
 fit2new
-p2new <- predict(fit2new, newdata=liga_test)
-cm2new <- confusionMatrix(p2new, liga_test$FTR)
-cm2new
+
 plot(fit2new, metric="Kappa")
 plot(fit2new, metric="Accuracy")
 
 sfStop()
 
+```
 
+
+- Random Forest
+
+```{r}
 sfInit (parallel=TRUE , cpus=5)
-
+set.seed(231)
 start.time <- Sys.time()  
 
 fit3new <- train(FTR ~ ., data = liga_train, method = "rf",ntree=500, importance=TRUE, 
@@ -970,102 +1015,190 @@ fit3new <- train(FTR ~ ., data = liga_train, method = "rf",ntree=500, importance
 end.time <- Sys.time()  
 time.taken8new <- end.time - start.time
 fit3new
-p3new <- predict(fit3new, newdata=liga_test)
-cm3new <- confusionMatrix(p3new, liga_test$FTR)
-cm3new
 
 plot(fit3new, metric="Kappa")
 plot(fit3new, metric="Accuracy")
 
 sfStop()
+```
+
+
+- Naive Bayes
+
+```{r}
 
 sfInit (parallel=TRUE , cpus=5)
-
+set.seed(345)
 start.time <- Sys.time()  
 
-fit4new <- train( FTR ~ ., data = liga_train, method = "nb", trControl = trainControl(method = "cv", number = 10)) 
+fit4new <- train( FTR ~ ., data = liga_train, method = "nb", trControl = trainControl(method = "cv", number = 5, repeats= 1)) 
 end.time <- Sys.time()  
 time.taken9new <- end.time - start.time
 fit4
-p4new <- predict(fit4new, newdata=liga_test)
-cm4new <- confusionMatrix(p4new, liga_test$FTR)
-cm4new
 
 plot(fit4new, metric="Kappa")
 plot(fit4new, metric="Accuracy")
 
 sfStop()
+```
 
+
+- SVM 
+
+```{r}
 sfInit (parallel=TRUE , cpus=5)
-
+set.seed(12)
 start.time <- Sys.time()  
-fit5new <- train(FTR ~ ., data = liga_train, method = "svmLinear", tuneLength = 30, trControl =trainControl(method = "repeatedcv", repeats = 3))
+fit5new <- train(FTR ~ ., data = liga_train, method = "svmLinear", tuneLength = 30, trControl =trainControl(method = "cv", repeats = 1, number=5))
 end.time <- Sys.time()  
 time.taken10new <- end.time - start.time
 fit5new
-p5new <- predict(fit5new, newdata=liga_test)
-cm5new <- confusionMatrix(p5new, liga_test$FTR)
-cm5new
 
 sfStop()
+```
+
+
+
+
+- GLM- Multinom.
+
+```{r}
 
 sfInit (parallel=TRUE , cpus=5)
-
+set.seed(123)
 start.time <- Sys.time()  
 
-fit6new <- train(FTR ~ ., data = liga_train, method = "multinom", maxit=500, tuneLength=1, trControl = trainControl(method = "cv", number=10, savePredictions=TRUE))
+fit6new <- train(FTR ~ ., data = liga_train, method = "multinom", maxit=1000, tuneLength=1, trControl = trainControl(method = "cv", number=5,repeats=1, savePredictions=TRUE))
 end.time <- Sys.time()  
 time.taken11new <- end.time - start.time
 fit6new
-p6new <- predict(fit6new, newdata=liga_test)
-p6newprob <- predict(fit6new, newdata=liga_test, type="prob")
-cm6new <- confusionMatrix(p6new, liga_test$FTR)
-cm6new
+
 sfStop()
 
-
-############################# Model Selection.##################################################
-
-
-###accuracy and kappa values.
-
-
-overallcmnew
-overallkvsmnew
-overallrfcmnew
-overallgnew
-overallnbnew
-cm1new$overall #decision tree
-cm2new$overall #gbm
-cm3new$overall #random forest
-cm4new$overall #naive Bayes
-cm5new$overall #svm
-cm6new$overall #multinom
-
-
-############################## Time taken by each model, with cv and without cv as well######################
-
-time.taken1new
-time.taken2new
-time.taken3new
-time.taken4new
-time.taken5new
-time.taken6new
-time.taken7new
-time.taken8new
-time.taken9new
-time.taken10new
-time.taken11new
 ```
 
-> for second model we will select GLM-Generlized liner (multinomial) model.
+
+## Model Selection.
+
+- Since models are fit on the same versions of the training data, it makes sense to make inferences on the differences between models. In this way we reduce the within-resample correlation that may exist. We can compute the differences as well, for t-test.
+
+
+```{r}
+# statistical statements about their performance differences. 
+
+results_newmodel <- resamples(list(DT2nd=fit1new, GBM2nd=fit2new, RF2nd= fit3new,NB2nd= fit4new, SVM2nd=fit5new, GLM2nd= fit6new))
+summary(results_newmodel)
+bwplot(results_newmodel)
+dotplot(results_newmodel)
+splom(results_newmodel)
+
+#more direct comparison.
+#  t-test to evaluate the null hypothesis that there is no difference between models.
+difValues2nd <- diff(results_newmodel)
+summary(difValues2nd)
+bwplot(difValues2nd)
+trellis.par.set(caretTheme())
+dotplot(difValues2nd)
+```
+
+
+- Based on several techniques implemented above for accuracy and kappa values of each model, and comparing their performances it is found **Linear - SVM** performances better than the other models, both in accuracy as well as kappa values, we will therefore use it for **test** dataset to get our results.
+- Interestingly for both the models, SVM has outperformed other models.
+
+
+## testing on test data with ur selected model.
+
+
+```{r}
+
+p5new <- predict(fit5new, newdata=liga_test)
+cm5new <- confusionMatrix(p5new, liga_test$FTR)
+cm5new
+cm5new$overall #svm
+set.seed(67885)
+fit5newprob <- train(FTR ~ ., data = liga_train, method = "svmLinear",  tuneLength = 30, 
+                  trControl =trainControl(classProbs = T, method = "cv", repeats = 1, number=5))#class probabilities
+p5newprob <- predict(fit5newprob, newdata=liga_test, type="prob") #svm prob
+p5newprob
+
+
+```
+
+
+
 
 ## Final results.
 
 ```{r}
-liga_test$PredictedFTRWhenHTRisknown <- as.data.frame(p1)
-liga_test$PredictedFTRWhenHTRisUnknown <- as.data.frame(p6new) 
-liga_test$PredictedFTRWhenHTRisknownProb <- as.data.frame(p1prob) #probabilities for lose, win or draw for away of home
-liga_test$PredictedFTRWhenHTRisUnknownProb <- as.data.frame(p6newprob) #predicted probs for lose, win or draw for away or home
-liga_test
+liga_test$PredictedFTRWhenHTRisknown <- as.data.frame(p5)
+liga_test$PredictedFTRWhenHTRisUnknown <- as.data.frame(p5new) 
+liga_test$PredictedFTRProbWhenHTRisknown <- as.data.frame(p5prob) #probabilities for lose, win or draw for away of home
+liga_test$PredictedFTRProbWhenHTRisUnknown <- as.data.frame(p5newprob) #predicted probs for lose, win or draw for away or home
+
+
+
+#getting data for betting experts odds and probabilities for comparisons.
+
+d <- as.Date(laligadf$Date, "%d/%m/%y")
+d <- strftime(d, "%Y-%m-%d")
+laligadf$Date <- d
+lig <- subset(laligadf, Date > "2015-08-01")
+lig <- lig[, c("B365H", "B365A", "B365D")]
+#converting odds to probabilities.
+lig$B365H <- odds.dec2prob(lig$B365H)
+lig$B365A <- odds.dec2prob(lig$B365A)
+lig$B365D <- odds.dec2prob(lig$B365D)
+
+liga_test <- as.data.frame(c(liga_test, lig))
+#removing variables(unwanted metrics such as predictors similar to train dataset) from final dataset of test, since we nomore need it.
+
+
+#final set.
+
+liga_test <- liga_test[, c(1, 14:24)]
+head(liga_test)
+
+#plotting the comparison between our predicted class with that of actual class( this is indirect visualization of confusion matrix in a way.)
+
+
+#first when HTR is known.
+
+spineplot(liga_test$FTR, liga_test$p5)
+
+#Now when HTR is unknown.
+spineplot(liga_test$FTR, liga_test$p5new)
+
+
+#comparing probabilities among each other- betting experts probs vs our prediction probs.
+
+
+
+#when HTR is Unknown.
+
+#we will look at the "home" grid(home team winning at the end actually), where when betting experts predicted home win probabilities , it shows that we predicted some of the results to be loss for home team, in favor of  away team (as color indicates) and very little as  "draw" too, but despite that, on comparing the probability numbers, it shows our prediction probs are higher and hence more reliable. 
+
+ggplot(liga_test, aes(x = B365H, y = PredictedFTRProbWhenHTRisUnknown.H, colour = p5new)) + 
+  geom_line() + facet_grid(FTR~., scales = "free")
+
+#we will look at the "away" grid(away team winning at the end actually), where when betting experts predicted away win probabilities , it shows that we predicted some of the results to be loss for away team, in favor of  home team (as color indicates) and none as draw,  but despite that, on comparing the probability numbers, it shows our prediction probs are higher and hence more reliable. 
+
+ggplot(liga_test, aes(x = B365A, y = PredictedFTRProbWhenHTRisUnknown.A, colour = p5new)) + 
+  geom_line() + facet_grid(FTR~., scales = "free")
+
+
+#when HTR is known.
+
+#we will look at the "home" grid, where when betting experts predicted home win, it shows that we predicted some of the resutls to be draw or loss as well, but despite that, it shows our prediction probs are higher and hence more reliable. 
+
+ggplot(liga_test, aes(x = B365H, y = PredictedFTRProbWhenHTRisknown.H, colour = p5)) + 
+  geom_line() + facet_grid(FTR~., scales = "free")
+
+#we will look at the "away" grid, where when betting experts predicted away, it shows that we predicted some of the resutls to be draw or loss as well, but despite that, it shows our prediction probs are higher and hence more reliable. 
+ggplot(liga_test, aes(x = B365A, y = PredictedFTRProbWhenHTRisknown.A, colour = p5)) + 
+  geom_line() + facet_grid(FTR~., scales = "free")
+
+# we will look at the "draw" grid, where whn betting experts predicted draw, it shows our prediction probs are higher and hence more reliable.
+ggplot(liga_test, aes(x = B365D, y = PredictedFTRProbWhenHTRisknown.D, colour = p5)) + 
+  geom_line() + facet_grid(FTR~., scales = "free")
+
 ```
