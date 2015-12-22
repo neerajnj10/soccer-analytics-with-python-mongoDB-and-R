@@ -1,4 +1,6 @@
-
+#### conda install pymongo
+#### conda install/update jupyter
+#### jupyter/ipython notebook
 """
 connecting with mongoDB in localhost
 """
